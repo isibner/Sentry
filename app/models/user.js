@@ -11,10 +11,6 @@ var UserSchema = new Schema({
   accessToken: {
     type: String,
     required: true
-  },
-  refreshToken: {
-    type: String,
-    required: true
   }
 });
 

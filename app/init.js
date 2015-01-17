@@ -46,10 +46,6 @@ module.exports = function (app) {
       callbackURL: "https://pennapps-todo.herokuapp.com/auth/github/callback"
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log('IN GH STRAT');
-      console.log('ACCESS TOKEN', accessToken);
-      console.log('REFRESH TOKEN', refreshToken);
-      console.log('PROFILE', profile);
       User.findOrCreate({
         'profile.id': profile.id
       }, {
@@ -66,7 +62,7 @@ module.exports = function (app) {
   ));
 
   passport.serializeUser(function (user, done) {
-    Console.log("Serialize user");
+    console.log("Serialize user");
     console.log(user);
     done(null, user.profile.id);
   });
