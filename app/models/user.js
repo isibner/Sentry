@@ -1,23 +1,23 @@
 var mongoose = require('mongoose');
-var passportLocalMongoose = require('passport-local-mongoose');
+var findOrCreate = require('mongoose-findorcreate');
 
 var Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
+  profile: {
+    type: {},
+    required: true
   },
-  email: {
+  accessToken: {
     type: String,
-    required: true,
-    unique: true
+    required: true
+  },
+  refreshToken: {
+    type: String,
+    required: true
   }
 });
 
-UserSchema.plugin(passportLocalMongoose, {
-  'usernameLowerCase': true
-});
+UserSchema.plugin(findOrCreate);
 
 mongoose.model('User', UserSchema);
