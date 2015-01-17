@@ -1,35 +1,15 @@
-var GithubAPI = require('github');
+var github = require('../../config/github');
 
-var github = new GithubAPI({
-  version: '3.0.0',
-
-  debug: true,
-  protocol: 'https',
-  //host: '', // not sure about this one
-  parthPrefix: '/api/v3', // for some GHEs
-  timeout: 5000,
-  headers: {
-    'user-agent': 'Github-Todo-App',
-  }
-});
-
-exports.index = function(req, res) {
+exports.index = function (req, res, next) {
   var user = req.user;
   if (req.user) {
-    github.authenticate({
-      type: 'oauth',
-      token: user.accessToken
-    });
-     msg = {
-      user: 'FabioFleitas',
-      repo: 'todo',
-      title: 'Test Issue',
-      body: 'Wow such body much oauth @FabioFleitas',
-      labels: ['cubans'],
-    }
-    github.issues.create(msg, function () {
-      res.render('landing');
-    });
+    user.findOwnRepos(function (err, data) {
+      if (err) {
+        return next(err);
+      }
+      console.log('data', JSON.stringify(Object.keys(data[0])));
+      return res.render('landing');
+    })
   } else {
     return res.redirect('/login');
   }

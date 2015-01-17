@@ -62,14 +62,10 @@ module.exports = function (app) {
   ));
 
   passport.serializeUser(function (user, done) {
-    console.log("Serialize user");
-    console.log(user);
     done(null, user.profile.id);
   });
 
   passport.deserializeUser(function (id, done) {
-    console.log("Deserialize user");
-    console.log(id);
     User.findOne({'profile.id': id}).exec(done);
   });
 
