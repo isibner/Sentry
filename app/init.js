@@ -40,9 +40,6 @@ module.exports = function (app) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-
-  console.log(config);
-
   passport.use(new GitHubStrategy({
       clientID: config.GITHUB_CLIENT_ID,
       clientSecret: config.GITHUB_CLIENT_SECRET,
@@ -91,7 +88,6 @@ module.exports = function (app) {
   app.use('/static', express.static(config.root + '/public'));
 
   app.use('/', require('./routes/landing'));
-  app.use('/dashboard', require('./routes/dashboard'));
   app.use('/auth', require('./routes/auth'));
 
   app.use(function (req, res, next) {
@@ -101,7 +97,7 @@ module.exports = function (app) {
   });
 
   /*eslint-disable no-unused-vars */
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     console.error(err);
     err.status = err.status || 500;
     res.status(err.status).render('error', {
