@@ -1,4 +1,5 @@
 var github = require('../../config/github');
+
 exports.index = function (req, res, next) {
   return res.render('landing');
 };
