@@ -88,6 +88,7 @@ module.exports = function (app) {
   app.use('/static', express.static(config.root + '/public'));
 
   app.use('/', require('./routes/landing'));
+  app.use('/', require('./routes/github'));
   app.use('/auth', require('./routes/auth'));
 
   app.use(function (req, res, next) {
