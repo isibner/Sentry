@@ -1,14 +1,14 @@
 var express = require('express');
 var landing = require('../controllers/landing');
+var auth = require('../controllers/auth');
 var user = require('../controllers/user');
 
 var router = express.Router();
 
-router.get('/', landing.index);
+router.get('/', auth.ensureAuthenticated, landing.getUserRepos, landing.index);
 router.get('/login', landing.login);
 router.get('/logout', landing.logout);
 
 router.post('/login', user.login);
-router.post('/register', user.register);
 
 module.exports = router;

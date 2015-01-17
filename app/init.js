@@ -21,7 +21,12 @@ module.exports = function (app) {
     extname: '.hbs',
     defaultLayout: 'layout',
     layoutsDir: path.join(config.appRoot, 'views', 'layouts'),
-    partialsDir: path.join(config.appRoot, 'views', 'partials')
+    partialsDir: path.join(config.appRoot, 'views', 'partials'),
+    helpers: {
+      toJSON: function (obj) {
+        return JSON.stringify(obj, null, '  ');
+      }
+    }
   }));
   app.set('view engine', '.hbs');
   app.set('port', process.env.PORT || 3000);
