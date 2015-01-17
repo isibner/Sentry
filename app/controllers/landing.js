@@ -1,8 +1,37 @@
+var GithubAPI = require('github');
+
+var github = new GithubAPI({
+  version: '3.0.0',
+
+  debug: true,
+  protocol: 'https',
+  //host: '', // not sure about this one
+  parthPrefix: '/api/v3', // for some GHEs
+  timeout: 5000,
+  headers: {
+    'user-agent': 'Github-Todo-App',
+  }
+});
+
 exports.index = function(req, res) {
+  var user = req.user;
   if (req.user) {
-    return res.redirect('/dashboard');
+    github.authenticate({
+      type: 'oauth',
+      token: user.accessToken
+    });
+     msg = {
+      user: 'FabioFleitas',
+      repo: 'todo',
+      title: 'Test Issue',
+      body: 'Wow such body much oauth @FabioFleitas',
+      labels: ['cubans'],
+    }
+    github.issues.create(msg, function () {
+      res.render('landing');
+    });
   } else {
-    return res.render('landing');
+    return res.redirect('/login');
   }
 };
 
