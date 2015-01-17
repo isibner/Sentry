@@ -1,12 +1,36 @@
 {
-  "name": "application-name",
+  "name": "pennapps-todo",
   "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app.js"
+  "description": "todo: add this",
+  "author": "Ian Sibner",
+  "main": "server.js",
+  "repository": {
+    "type": "git"
+  },
+  "engines": {
+    "node": "0.10.x"
   },
   "dependencies": {
-    "express": "3.4.7",
-    "jade": "*"
+    "body-parser": "^1.10.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.3.3",
+    "express": "^4.10.6",
+    "express-handlebars": "^1.1.0",
+    "express-session": "^1.9.3",
+    "express-validator": "^2.8.0",
+    "mongoose": "^3.8.21",
+    "morgan": "^1.5.0",
+    "passport": "^0.2.1",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^1.0.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-eslint": "^2.1.0",
+    "grunt-nodemon": "^0.3.0",
+    "grunt-githooks": "^0.3.1"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }

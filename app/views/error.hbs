@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Node Boiler - Error</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/static/css/normalize.css">
+  <link rel="stylesheet" href="/static/css/skeleton.css">
+
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="twelve column" style="margin-top: 5%">
+        <h3>Node Boiler - Error</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <h3>{{ error.message }} (status {{ error.status }})</h3>
+        <pre>{{ error.stack }}</pre>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
