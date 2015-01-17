@@ -8,5 +8,7 @@ module.exports = {
   cookieSecret: '12345',
   mongo: {
     uri: process.env.MONGOLAB_URI || 'mongodb://localhost/node-boiler'
-  }
+  },
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET
 };
