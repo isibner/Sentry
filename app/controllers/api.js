@@ -32,3 +32,8 @@ exports.addRepo = function (req, res, next) {
     user.save(done);
   });
 };
+
+var webhookAll = function (req, res, next) {
+  console.log('Webhook!', JSON.stringify(req.body, null, '  '));
+  apiDone(res, next)();
+}
