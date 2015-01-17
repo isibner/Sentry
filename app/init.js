@@ -8,7 +8,8 @@ var logger = require('morgan'),
     passport = require('passport'),
     flash = require('connect-flash'),
     exphbs = require('express-handlebars'),
-    expressValidator = require('express-validator');
+    expressValidator = require('express-validator'),
+    GitHubStrategy = require('passport-github').Strategy;
 
 var db = require('../config/db');
 var User = db.model('User');
