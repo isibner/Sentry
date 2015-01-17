@@ -40,9 +40,38 @@ module.exports = function (app) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.use(User.createStrategy());
-  passport.serializeUser(User.serializeUser());
-  passport.deserializeUser(User.deserializeUser());
+  passport.use(new GitHubStrategy({
+      clientID: config.GITHUB_CLIENT_ID,
+      clientSecret: config.GITHUB_CLIENT_SECRET,
+      callbackURL: "https://pennapps-todo.herokuapp.com/auth/github/callback"
+    },
+    function (accessToken, refreshToken, profile, done) {
+      User.findOrCreate({
+        'profile.id': profile.id
+      }, {
+        profile: profile,
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      }, function (err, user) {
+        user.profile = profile;
+        user.accessToken = accessToken;
+        user.refreshToken = refreshToken;
+        user.save(done);
+      });
+    }
+  ));
+
+  passport.serializeUser(function (user, done) {
+    Console.log("Serialize user");
+    console.log(user);
+    done(null, user.profile.id);
+  });
+
+  passport.deserializeUser(function (id, done) {
+    console.log("Deserialize user");
+    console.log(id);
+    User.findOne({'profile.id': id}).exec(done);
+  });
 
   app.use(function(req, res, next) {
     res.locals.successFlashes = req.flash('success');
@@ -60,7 +89,7 @@ module.exports = function (app) {
 
   app.use('/', require('./routes/landing'));
   app.use('/', require('./routes/github'));
-  app.use('/dashboard', require('./routes/dashboard'));
+  app.use('/auth', require('./routes/auth'));
 
   app.use(function (req, res, next) {
     var err = new Error('Not Found');
@@ -69,7 +98,7 @@ module.exports = function (app) {
   });
 
   /*eslint-disable no-unused-vars */
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     console.error(err);
     err.status = err.status || 500;
     res.status(err.status).render('error', {
