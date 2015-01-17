@@ -46,6 +46,10 @@ module.exports = function (app) {
       callbackURL: "https://pennapps-todo.herokuapp.com/auth/github/callback"
     },
     function (accessToken, refreshToken, profile, done) {
+      console.log('IN GH STRAT');
+      console.log('ACCESS TOKEN', accessToken);
+      console.log('REFRESH TOKEN', refreshToken);
+      console.log('PROFILE', profile);
       User.findOrCreate({
         'profile.id': profile.id
       }, {
