@@ -174,10 +174,27 @@ exports.addRepo = function (req, res, next) {
     if (err) {
       return next(err);
     }
-    user.repos = user.repos || [];
-    user.repos.push(req.params.repo);
-    user.save(function (err) {
-      addIssues(req, res, next);
+    var msg = {
+      user: user.profile.username,
+      repo: req.params.repo,
+      name: 'web',
+      events: ['push'],
+      active: true,
+      config: {
+        url: 'https://pennapps-todo.herokuapp.com/api/webhook/all',
+        content_type: 'json',
+        insecure_ssl: 1
+      }
+    };
+    github(authCreds).repos.createHook(msgs, function (err) {
+      if (err) {
+        return next(err);
+      }
+      user.repos = user.repos || [];
+      user.repos.push(req.params.repo);
+      user.save(function (err) {
+        addIssues(req, res, next);
+      });
     });
   });
 };
