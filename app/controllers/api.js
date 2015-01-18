@@ -118,19 +118,21 @@ var webhookPushHandler = function(data) {
 
   var repoOwner = data.repository.owner.name;
   var repoName = data.repository.name;
-  var commitSha = data.after;
+  var commitShaBefore = data.before;
+  var commitShaAfter = data.after;
 
   var msg = {
     user: repoOwner,
     repo: repoName,
-    sha: commitSha,
+    base: commitShaBefore,
+    head: commitShaAfter,
   }
 
   var additions = [];
   var subtractions = [];
 
-  var commit = github(authCreds).repos.getCommit(msg, function(err, res) {
-    var author = res.author.login;
+  var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
+    // var author = res.author.login;
     var files = res.files;
 
     // go thru each files, find the patches, and separate the additions from subtractions in file
