@@ -79,7 +79,7 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
 
 var createIssueWorker = function (user, repo) {
   return function (task, callback) {
-    task.fileref = '[' + task.filename + '](https://github.com/' + user.profile.username + '/' + repo + '/blob/' + todo.sha + '/' + todo.filename + '#' + todo.lineNum + ')'
+    task.fileref = '[' + task.filename + '](https://github.com/' + user.profile.username + '/' + repo + '/blob/' + task.sha + '/' + task.filename + '#' + task.lineNum + ')';
     createTodoIssue(task, user.profile.username, repo, callback);
   };
 };
@@ -176,7 +176,7 @@ exports.addRepo = function (req, res, next) {
     }
     user.repos = user.repos || [];
     user.repos.push(req.params.repo);
-    user.save(function () {
+    user.save(function (err) {
       addIssues(req, res, next);
     });
   });

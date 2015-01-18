@@ -10,7 +10,7 @@ exports.getUserRepos = function getUserRepos(req, res, next) {
       return next(err);
     }
     res.locals.userRepos = repos.map(function (repo) {
-       if (req.user.repos.indexOf(repo) !== -1) {
+       if (req.user.repos && req.user.repos.indexOf(repo.name) !== -1) {
         repo.todoBotActive = true;
        }
        return repo;

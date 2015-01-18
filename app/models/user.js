@@ -12,7 +12,8 @@ var UserSchema = new Schema({
   accessToken: {
     type: String,
     required: true
-  }
+  },
+  repos: [String]
 });
 
 UserSchema.plugin(findOrCreate);

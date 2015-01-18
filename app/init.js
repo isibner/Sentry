@@ -27,10 +27,10 @@ module.exports = function (app) {
         return JSON.stringify(obj, null, '  ');
       },
       addOrRemove: function () {
-        this.todoBotActive ? 'add' : 'remove';
+        return this.todoBotActive ? 'remove' : 'add';
       },
       addOrRemoveCaps: function () {
-        this.todoBotActive ? 'Add' : 'Remove';
+        return this.todoBotActive ? 'Remove' : 'Add';
       }
     }
   }));
