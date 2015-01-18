@@ -300,22 +300,21 @@ var closeTodoIssue = function(todo, user, repo, callback) {
 
   github(authCreds).issues.repoIssues(msg, function(err, res) {
     if (err) {
-      console.log(err);
+      return callback(err);
     } else {
-      console.log(res);
 
       var issueNumber = null;
       var issues = res;
       for (var i = 0; i < issues.length; i++) {
         var issue = issues[i];
 
-        if (issue.title == todo.title) {
+        if (issue.title === todo.title) {
           issueNumber = issue.number;
           break;
         }
       }
 
-      if (issueNumber != null) {
+      if (issueNumber !== null) {
         msg = {
           user: user,
           repo: repo,
@@ -324,33 +323,37 @@ var closeTodoIssue = function(todo, user, repo, callback) {
         };
 
         github(authCreds).issues.edit(msg, function(err, res) {
-          console.log(res);
+          var body = 'Completed task.' + '\n\n---\n' + 'Completed in ' + todo.sha + ' by ' + todo.name + '. See ' + todo.fileref + '.';
+          msg = {
+            user: user,
+            repo: repo,
+            number: issueNumber,
+            body: body,
+          };
+
+          github(authCreds).issues.createComment(msg, function (err, res) {
+            callback(err);
+          });
         });
-
-        var body = 'Completed task.' + '\n\n---\n' + 'Completed in ' + todo.sha + ' by ' + todo.name + '. See ' + todo.fileref + '.';
-
-        msg = {
-          user: user,
-          repo: repo,
-          number: issueNumber,
-          body: body,
-        };
-
-        github(authCreds).issues.createComment(msg, function(err, res) {
-          console.log(res);
-        });
+      } else {
+        console.log('Issue number is ' + issueNumber);
       }
     }
   });
 }
 
 var closeTodoIssues = function(todos, user, repo, callback) {
-  for (var i = 0; i < todos.length; i++) {
-    var todo = todos[i];
+  var todoDestroyerWorker = function (todo, workerCallback) {
+    closeTodoIssue(todo, user, repo, workerCallback);
+  };
+  var q = async.queue(todoDestroyerWorker, 2);
+  q.drain = function () {
+    console.log('callback 2');
+    callback();
+  };
 
-    closeTodoIssue(todo, user, repo, callback);
-  }
-}
+  q.push(todos);
+};
 
 var webhookPushHandler = function(data, callback) {
   var authCreds = {
@@ -413,8 +416,10 @@ var webhookPushHandler = function(data, callback) {
     removedTodos = getRemovedTodos(subtractions);
     console.log('Removed Todos: ', removedTodos);
 
-    createTodoIssues(newTodos, repoOwner, repoName, callback);
-    closeTodoIssues(removedTodos, repoOwner, repoName, callback);
+    createTodoIssues(newTodos, repoOwner, repoName, function () {
+      console.log('callback 1');
+      closeTodoIssues(removedTodos, repoOwner, repoName, callback);
+    });
 
   });
 }
