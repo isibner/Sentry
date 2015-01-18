@@ -211,6 +211,12 @@ var createNewIssues = function(todos, user, repo) {
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
 
+    var authCreds = {
+      type: 'basic',
+      username: config.BOT_USERNAME,
+      password: config.BOT_PASSWORD,
+    };
+
     msg = {
       user: user,
       repo: repo,
@@ -220,7 +226,7 @@ var createNewIssues = function(todos, user, repo) {
       labels: ['todo'],
     };
 
-    github.issues.create(msg, function(err, res) {
+    github(authCreds).issues.create(msg, function(err, res) {
       console.log(err);
       console.log(res);
     });
