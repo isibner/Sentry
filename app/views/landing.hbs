@@ -5,19 +5,29 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-xs-offset-4 col-xs-4">
-      <a href="https://github.com/login/oauth/authorize?client_id={{client_id}}&redirect_uri={{redirect_uri}}&scope={{scope}}&state={{state}}" class="btn btn-block btn-lg btn-social btn-github">
-          <i class="fa fa-github"></i> Sign in with Github
-        </a>
+  <div class="row mt centered">
+    <div class="col-lg-6 col-lg-offset-3">
+      <h1>Your Github Repos</h1>
+      <hr>
     </div>
   </div>
+  
+
+
   <div class="row">
     <div class="col-xs-offset-4 col-xs-4">
-      {{toJSON userRepos}}
-      <br>
-      <br>
-      {{toJSON authUser.profile}}
+      {{#each userRepos}}
+        <div class="row mt centered">
+
+          <div class="col-sm-3 col-sm-offset-3">
+            <h4>{{name}}</h4>
+          </div>
+
+          <div class="col-sm-3">
+            <button data-repo="{{name}}" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
+          </div>
+        </div>
+      {{/each}}
     </div>
   </div>
 
