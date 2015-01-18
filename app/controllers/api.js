@@ -1,7 +1,7 @@
 var github = require('../../config/github');
 var config = require('../../config/config');
 
-var todoRegex = /^\+[\s]+[\W]*[\s]*TODO[\W|\s]*/i; // regex match for finding a TODO comment
+var todoRegex = /^[\+|\-][\s]+[\W]*[\s]*TODO[\W|\s]*/i; // regex match for finding a TODO comment
 var labelRegex = /^\+[\s]+[\W]*[\s]*LABELS[\W|\s]*/i; // regex match for finding a LABELS comment
 var bodyRegex = /^\+[\s]+[\W]*[\s]*BODY[\W|\s]*/i; // regex match for finding a BODY comment
 
@@ -149,8 +149,8 @@ var webhookPushHandler = function(data) {
       }
     }
 
-    // console.log(additions);
-    // console.log(subtractions);
+    console.log(additions);
+    console.log(subtractions);
 
     newTodos = getTodos(additions);
     console.log("New Todos");
