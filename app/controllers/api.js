@@ -53,7 +53,7 @@ var getTodoData = function(additions, idx) {
 };
 
 var getLabels = function (line) {
-  return line.split(labelRegex)[1];
+  return line.split(labelRegex)[1].split(', ');
 };
 
 var getBody = function (line) {
