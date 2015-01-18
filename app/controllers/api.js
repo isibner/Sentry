@@ -208,8 +208,11 @@ var getRemovedTodos = function(subtractions) {
 }
 
 var createNewIssues = function(todos, user, repo) {
+  console.log("yo yo yo!");
+  console.log(todos);
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
+    console.log(todo);
 
     var authCreds = {
       type: 'basic',
@@ -221,14 +224,15 @@ var createNewIssues = function(todos, user, repo) {
       user: user,
       repo: repo,
       title: todo.title,
-      body: todo.body,
-      // TODO: update right here!
+      // body: todo.body,
+      // TODO: update ova here!
       labels: ['todo'],
     };
 
+    console.log(msg);
+
     github(authCreds).issues.create(msg, function(err, res) {
-      console.log(err);
-      console.log(res);
+      console.log("wow I got here!");
     });
 
   }
@@ -281,14 +285,12 @@ var webhookPushHandler = function(data) {
     console.log(subtractions);
 
     newTodos = getTodos(additions);
-    console.log("New Todos");
-    console.log(newTodos);
+    console.log("New Todos", newTodos);
 
     removedTodos = getRemovedTodos(subtractions);
-    console.log("Removed Todos");
-    console.log(removedTodos);
+    console.log("Removed Todos", removedTodos);
 
-    createNewIssues(additions, repoOwner, repoName);
+    createNewIssues(newTodos, repoOwner, repoName);
 
   });
 }
