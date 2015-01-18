@@ -25,6 +25,12 @@ module.exports = function (app) {
     helpers: {
       toJSON: function (obj) {
         return JSON.stringify(obj, null, '  ');
+      },
+      addOrRemove: function () {
+        this.todoBotActive ? 'add' : 'remove';
+      },
+      addOrRemoveCaps: function () {
+        this.todoBotActive ? 'Add' : 'Remove';
       }
     }
   }));

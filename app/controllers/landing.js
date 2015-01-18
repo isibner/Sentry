@@ -9,7 +9,12 @@ exports.getUserRepos = function getUserRepos(req, res, next) {
     if (err) {
       return next(err);
     }
-    res.locals.userRepos = repos;
+    res.locals.userRepos = repos.map(function (repo) {
+       if (req.user.repos.indexOf(repo) !== -1) {
+        repo.todoBotActive = true;
+       }
+       return repo;
+    });
     next();
   })
 }

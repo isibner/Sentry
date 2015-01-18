@@ -22,10 +22,47 @@
       </div>
 
       <div class="col-sm-3">
-        <button data-repo="{{name}}" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
+        <button data-repo="{{name}}" data-action="{{addOrRemove}}" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> {{addOrRemoveCaps}}</button>
       </div>
     </div>
   {{/each}}
 
 
 </div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.btn-repo').on('click', function() {
+      var repo = this.getAttribute('data-repo');
+      var action = this.getAttribute('data-action');
+      console.log(repo);
+      console.log(action);
+
+      if (action === 'remove') {
+        swal({
+          title: 'Are you sure?',
+          text: 'We will remove TodoBot as a collaborator from ' + repo + ' , but all issues will stay open.',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Yes, remove TodoBot',
+          closeOnConfirm: false ,
+          }, 
+          function(){
+            swal('Deleted!', 'Your imaginary file has been deleted.', 'success'); 
+          });
+      } else if (action === 'add') {
+        $.ajax({
+          type: 'POST',
+          url: '/api/addRepo/' + repo,
+          success: function(data) {
+            console.log(data);
+          },
+          error: function(data) {
+            console.log(data);
+          }
+        });
+      }
+    });
+  });
+</script>
