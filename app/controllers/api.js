@@ -43,7 +43,8 @@ var getTodoData = function(additions, idx) {
   var str = additions[idx];
 
   if (isTodoLabel(str)) {
-    return ['labels', str.split(labelRegex)[1]];
+    var labels = str.split(labelRegex)[1].split(', ');
+    return ['labels', labels];
   } else if (isTodoBody(str)) {
     return ['body', str.split(bodyRegex)[1]];
   } else {
@@ -64,24 +65,22 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
     var cwd = process.cwd();
     process.chdir(tempFolderPath);
     var gitPath = path.relative(tempFolderPath, task.path);
-    task.gitPath = gitPath;
+    task.filename = gitPath;
     exec(['git', 'blame', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
       // TODO: Make this prettier.
-      var importantPart = out.substring(0, out.indexOf(')') + 1);
-      task.blameMessage = importantPart;
+      var importantPart = out.substring(1, out.indexOf(')') + 1);
+      task.sha = importantPart.split('(')[0].trim();
+      task.name = importantPart.split('(')[1].split(/[\d]{4}\-[\d]{2}\-[\d]{2}/i)[0].trim();
       issueQueue.push(task);
       callback();
     });
   }
 };
 
-var createIssueWorker = function (user) {
+var createIssueWorker = function (user, repo) {
   return function (task, callback) {
-    console.log('Run issue task: ', {
-      username: user.profile.username,
-      task: task
-    });
-    callback();
+    task.fileref = '[' + task.filename + '](https://github.com/' + user.profile.username + '/' + repo + '/blob/' + todo.sha + '/' + todo.filename + '#' + todo.lineNum + ')'
+    createTodoIssue(task, user.profile.username, repo, callback);
   };
 };
 
@@ -143,7 +142,7 @@ var addIssues = function (req, res, next) {
       });
     var todos = parseTodos(files, req.params.repo);
     console.log('Parsed todos:', todos);
-    var issueQueue = async.queue(createIssueWorker(req.user), 2);
+    var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), 2);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), 5);
 
     issueQueue.drain = function () {
@@ -188,9 +187,13 @@ var getTodos = function(additions) {
 
   for (var i = 0; i < additions.length; i++) {
     var addition = additions[i];
-    if (isTodo(addition)) {
+    if (isTodo(addition.line)) {
       var todo = {
-        title: getTodoTitle(addition),
+        title: getTodoTitle(addition.line),
+        sha: addition.sha,
+        filename: addition.filename,
+        fileref: addition.fileref,
+        name: addition.name,
       };
 
       var idx = i+1;
@@ -213,9 +216,13 @@ var getRemovedTodos = function(subtractions) {
 
   for (var i = 0; i < subtractions.length; i++) {
     var subtraction = subtractions[i];
-    if (isTodo(subtraction)) {
+    if (isTodo(subtraction.line)) {
       var todo = {
-        title: getTodoTitle(subtraction),
+        title: getTodoTitle(subtraction.line),
+        sha: subtraction.sha,
+        filename: subtraction.filename,
+        fileref: subtraction.fileref,
+        name: subtraction.name,
       };
 
       todos.push(todo);
@@ -225,35 +232,103 @@ var getRemovedTodos = function(subtractions) {
   return todos;
 }
 
-var createNewIssues = function(todos, user, repo) {
+var createTodoIssue = function(todo, user, repo, callback) {
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  var labels = todo.labels || [];
+  labels.push('todo');
+
+  var body = (todo.body || 'No details provided.') + '\n\n---\n' + 'Created in ' + todo.sha + ' by ' + todo.name + '. See ' + todo.fileref + '.';
+
+  msg = {
+    user: user,
+    repo: repo,
+    title: todo.title,
+    body: body,
+    labels: labels,
+  };
+
+  github(authCreds).issues.create(msg, callback);
+}
+
+var createTodoIssues = function(todos, user, repo, callback) {
+  var todoCreatorWorker = function (todo, workerCallback) {
+    createTodoIssue(todo, user, repo, workerCallback);
+  };
+  var q = async.queue(todoCreatorWorker, 2);
+  q.drain = callback;
+
+  q.push(todos);
+}
+
+var getIssueNumber = function(title, user, repo) {
+  if (title === null) { return null; }
+
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  msg = {
+    user: user,
+    repo: repo,
+    state: 'open',
+    labels: 'todo',
+    per_page: 100,
+  };
+
+  github(authCreds).issues.repoIssues(msg, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+}
+
+var closeTodoIssue = function(todo, user, repo) {
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  var issueNumber = getIssueNumber(todo.title, user, repo);
+
+  return;
+
+  msg = {
+    user: user,
+    repo: repo,
+    title: todo.title,
+    body: todo.body || '',
+    // TODO: update ova here!
+    labels: ['todo'],
+  };
+
+  github(authCreds).issues.create(msg, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+}
+
+var closeTodoIssues = function(todos, user, repo) {
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
 
-    var authCreds = {
-      type: 'basic',
-      username: config.BOT_USERNAME,
-      password: config.BOT_PASSWORD,
-    };
-
-    msg = {
-      user: user,
-      repo: repo,
-      title: todo.title,
-      body: todo.body || '',
-      // TODO: update ova here!
-      labels: ['todo'],
-    };
-
-    console.log(msg);
-
-    github(authCreds).issues.create(msg, function(err, res) {
-      console.log("wow I got here!");
-    });
-
+    removeTodoIssue(todo, user, repo);
   }
 }
 
-var webhookPushHandler = function(data) {
+var webhookPushHandler = function(data, callback) {
   var authCreds = {
     type: 'basic',
     username: config.BOT_USERNAME,
@@ -277,7 +352,7 @@ var webhookPushHandler = function(data) {
 
   var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
     // var author = res.author.login;
-    console.log(res);
+    console.log(JSON.stringify(res, null, '  '));
     var files = res.files;
 
     // go thru each files, find the patches, and separate the additions from subtractions in file
@@ -289,9 +364,21 @@ var webhookPushHandler = function(data) {
         var line = patch[j];
 
         if (line.lastIndexOf('+', 0) === 0) {
-          additions.push(line);
+          additions.push({
+            line: line,
+            sha: commitShaAfter,
+            filename: file.filename,
+            fileref: '[' + file.filename + '](' + file.blob_url + ')',
+            name: '@' + res.base_commit.committer.login,
+          });
         } else if (line.lastIndexOf('-', 0) === 0) {
-          subtractions.push(line);
+          subtractions.push({
+            line: line,
+            sha: file.sha,
+            filename: file.filename,
+            fileref: file.blob_url,
+            name: '@' + res.base_commit.committer.login,
+          });
         }
       }
     }
@@ -302,7 +389,7 @@ var webhookPushHandler = function(data) {
     removedTodos = getRemovedTodos(subtractions);
     console.log('Removed Todos: ', removedTodos);
 
-    createNewIssues(newTodos, repoOwner, repoName);
+    createTodoIssues(newTodos, repoOwner, repoName, callback);
 
   });
 }
@@ -310,6 +397,6 @@ var webhookPushHandler = function(data) {
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
   // console.log(req);
-  webhookPushHandler(req.body);
-  apiDone(res, next)();
+  webhookPushHandler(req.body, apiDone(res, next));
+  
 };
