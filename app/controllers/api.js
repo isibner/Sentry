@@ -1,3 +1,4 @@
+var util = require('util');
 var github = require('../../config/github');
 var config = require('../../config/config');
 
@@ -35,6 +36,6 @@ exports.addRepo = function (req, res, next) {
 
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
-  console.log(JSON.stringify(req));
+  console.log(JSON.stringify(util.inspect(req)));
   apiDone(res, next)();
 }
