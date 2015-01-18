@@ -18,6 +18,9 @@
   <!-- Theme CSS -->
   <link rel="stylesheet" href="/static/css/theme.css">
 
+  <!-- Sweet Alert -->
+  <link rel="stylesheet" href="/static/css/sweet-alert.css">  
+
   <style type="text/css">
     .header-img {
       margin: 0 auto;
@@ -49,6 +52,18 @@
       text-align: center;
       margin-top: 40px;
     }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    .btn-repo {
+      min-width: 100px;
+    }
+
+    .navbar-fixed-top {
+      z-index: 1;
+    }
   </style>
 
   <link rel="icon" type="image/png" href="images/favicon.png" />
@@ -63,9 +78,16 @@
     </div>
   </div>
 
-  {{{body}}}
-
   <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/sweet-alert.min.js"></script>
+
+  {{{body}}}
+
+  <div class="container">
+    <hr>
+    <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> & <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a></p>
+  </div>
+
 </body>
 </html>

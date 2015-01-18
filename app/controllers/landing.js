@@ -13,6 +13,10 @@ exports.getUserRepos = function getUserRepos(req, res, next) {
   })
 }
 
+exports.settings = function(req, res) {
+  return res.render('settings');
+}
+
 exports.login = function(req, res) {
   return res.render('login');
 };
