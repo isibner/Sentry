@@ -224,6 +224,34 @@ var getRemovedTodos = function(subtractions) {
   return todos;
 }
 
+var createNewIssues = function(todos, user, repo) {
+  for (var i = 0; i < todos.length; i++) {
+    var todo = todos[i];
+
+    var authCreds = {
+      type: 'basic',
+      username: config.BOT_USERNAME,
+      password: config.BOT_PASSWORD,
+    };
+
+    msg = {
+      user: user,
+      repo: repo,
+      title: todo.title,
+      body: todo.body || '',
+      // TODO: update ova here!
+      labels: ['todo'],
+    };
+
+    console.log(msg);
+
+    github(authCreds).issues.create(msg, function(err, res) {
+      console.log("wow I got here!");
+    });
+
+  }
+}
+
 var webhookPushHandler = function(data) {
   var authCreds = {
     type: 'basic',
@@ -248,6 +276,7 @@ var webhookPushHandler = function(data) {
 
   var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
     // var author = res.author.login;
+    console.log(res);
     var files = res.files;
 
     // go thru each files, find the patches, and separate the additions from subtractions in file
@@ -271,6 +300,8 @@ var webhookPushHandler = function(data) {
 
     removedTodos = getRemovedTodos(subtractions);
     console.log('Removed Todos: ', removedTodos);
+
+    createNewIssues(newTodos, repoOwner, repoName);
 
   });
 }
