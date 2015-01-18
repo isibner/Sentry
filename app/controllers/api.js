@@ -64,24 +64,21 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
     var cwd = process.cwd();
     process.chdir(tempFolderPath);
     var gitPath = path.relative(tempFolderPath, task.path);
-    task.gitPath = gitPath;
+    task.filename = gitPath;
     exec(['git', 'blame', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
       // TODO: Make this prettier.
       var importantPart = out.substring(1, out.indexOf(')') + 1);
-      task.blameMessage = importantPart;
+      task.sha = importantPart.split('(')[0].trim();
+      task.name = importantPart.split('(')[1].split(/[\d]{4}\-[\d]{2}\-[\d]{2}/i)[0].trim();
       issueQueue.push(task);
       callback();
     });
   }
 };
 
-var createIssueWorker = function (user) {
+var createIssueWorker = function (user, repo) {
   return function (task, callback) {
-    console.log('Run issue task: ', {
-      username: user.profile.username,
-      task: task
-    });
-    callback();
+    createTodoIssue(task, user.profile.username, repo, callback);
   };
 };
 
@@ -142,7 +139,7 @@ var addIssues = function (req, res, next) {
       });
     var todos = parseTodos(files);
     console.log('Parsed todos:', todos);
-    var issueQueue = async.queue(createIssueWorker(req.user), 2);
+    var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), 2);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), 5);
 
     issueQueue.drain = function () {
@@ -230,13 +227,13 @@ var createTodoIssue = function(todo, user, repo, callback) {
     username: config.BOT_USERNAME,
     password: config.BOT_PASSWORD,
   };
-
+  var body = todo.body + '\n\n' + 'Created in commit ' + todo.sha + ' by ' + todo.name '. See [' + todo.filename + '.](https://github.com/' + user + '/' + repo + '/blob/' + todo.sha + '/' + todo.filename + '#' + (todo.lineNum || '') + ')';
   msg = {
     user: user,
     repo: repo,
     title: todo.title,
-    body: todo.body || '',
-    labels: ['todo']
+    body: body,
+    labels: todo.labels
   };
 
   github(authCreds).issues.create(msg, callback);
