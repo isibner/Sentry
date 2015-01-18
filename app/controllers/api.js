@@ -422,6 +422,9 @@ var webhookPushHandler = function(data, callback) {
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
   // console.log(req);
+  if (req.get('X-GitHub-Event') === 'ping') {
+    return apiDone(res, next)();
+  }
   webhookPushHandler(req.body, apiDone(res, next));
   
 };
