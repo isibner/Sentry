@@ -191,7 +191,7 @@ var getTodos = function(additions) {
         sha: addition.sha,
         filename: addition.filename,
         fileref: addition.fileref,
-        name: addition.filename,
+        name: addition.name,
       };
 
       var idx = i+1;
@@ -220,7 +220,7 @@ var getRemovedTodos = function(subtractions) {
         sha: subtraction.sha,
         filename: subtraction.filename,
         fileref: subtraction.fileref,
-        name: subtraction.filename,
+        name: subtraction.name,
       };
 
       todos.push(todo);
@@ -236,10 +236,10 @@ var createTodoIssue = function(todo, user, repo, callback) {
     username: config.BOT_USERNAME,
     password: config.BOT_PASSWORD,
   };
-  var labels = todo.labels;
+  var labels = todo.labels || [];
   labels.push('todo');
 
-  var body = todo.body + '\n\n' + 'Created in commit ' + todo.sha + ' by ' + todo.name '. See [' + todo.filename + '.](https://github.com/' + user + '/' + repo + '/blob/' + todo.sha + '/' + todo.filename + '#' + (todo.lineNum || '') + ')';
+  var body = todo.body + '\n\n' + 'Created in commit ' + todo.sha + ' by ' + todo.name + '. See [' + todo.filename + '.](https://github.com/' + user + '/' + repo + '/blob/' + todo.sha + '/' + todo.filename + '#' + (todo.lineNum || '') + ')';
 
   msg = {
     user: user,
