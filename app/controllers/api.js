@@ -43,7 +43,8 @@ var getTodoData = function(additions, idx) {
   var str = additions[idx];
 
   if (isTodoLabel(str)) {
-    return ['labels', str.split(labelRegex)[1]];
+    var labels = str.split(labelRegex)[1].split(', ');
+    return ['labels', labels];
   } else if (isTodoBody(str)) {
     return ['body', str.split(bodyRegex)[1]];
   } else {
@@ -187,9 +188,13 @@ var getTodos = function(additions) {
 
   for (var i = 0; i < additions.length; i++) {
     var addition = additions[i];
-    if (isTodo(addition)) {
+    if (isTodo(addition.line)) {
       var todo = {
-        title: getTodoTitle(addition),
+        title: getTodoTitle(addition.line),
+        sha: addition.sha,
+        filename: addition.filename,
+        fileref: addition.fileref,
+        name: addition.filename,
       };
 
       var idx = i+1;
@@ -212,9 +217,13 @@ var getRemovedTodos = function(subtractions) {
 
   for (var i = 0; i < subtractions.length; i++) {
     var subtraction = subtractions[i];
-    if (isTodo(subtraction)) {
+    if (isTodo(subtraction.line)) {
       var todo = {
-        title: getTodoTitle(subtraction),
+        title: getTodoTitle(subtraction.line),
+        sha: subtraction.sha,
+        filename: subtraction.filename,
+        fileref: subtraction.fileref,
+        name: subtraction.filename,
       };
 
       todos.push(todo);
@@ -231,12 +240,15 @@ var createTodoIssue = function(todo, user, repo, callback) {
     password: config.BOT_PASSWORD,
   };
 
+  var labels = todo.labels;
+  labels.push('todo');
+
   msg = {
     user: user,
     repo: repo,
     title: todo.title,
     body: todo.body || '',
-    labels: ['todo']
+    labels: labels
   };
 
   github(authCreds).issues.create(msg, callback);
@@ -339,7 +351,7 @@ var webhookPushHandler = function(data, callback) {
 
   var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
     // var author = res.author.login;
-    console.log(res);
+    console.log(JSON.stringify(res, null, '  '));
     var files = res.files;
 
     // go thru each files, find the patches, and separate the additions from subtractions in file
@@ -351,9 +363,21 @@ var webhookPushHandler = function(data, callback) {
         var line = patch[j];
 
         if (line.lastIndexOf('+', 0) === 0) {
-          additions.push(line);
+          additions.push({
+            line: line,
+            sha: file.sha,
+            filename: file.filename,
+            fileref: file.blob_url,
+            name: '@' + res.base_commit.committer.login,
+          });
         } else if (line.lastIndexOf('-', 0) === 0) {
-          subtractions.push(line);
+          subtractions.push({
+            line: line,
+            sha: file.sha,
+            filename: file.filename,
+            fileref: file.blob_url,
+            name: '@' + res.base_commit.committer.login,
+          });
         }
       }
     }
