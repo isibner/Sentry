@@ -66,7 +66,7 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
     process.chdir(tempFolderPath);
     var gitPath = path.relative(tempFolderPath, task.path);
     task.filename = gitPath;
-    exec(['git', 'blame', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
+    exec(['git', 'blame', '-l', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
       // TODO: Make this prettier.
       var importantPart = out.substring(1, out.indexOf(')') + 1);
       task.sha = importantPart.split('(')[0].trim();
