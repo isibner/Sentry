@@ -1,4 +1,3 @@
-var util = require('util');
 var github = require('../../config/github');
 var config = require('../../config/config');
 
