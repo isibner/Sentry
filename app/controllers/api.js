@@ -72,6 +72,7 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
       task.sha = importantPart.split('(')[0].trim();
       task.name = importantPart.split('(')[1].split(/[\d]{4}\-[\d]{2}\-[\d]{2}/i)[0].trim();
       issueQueue.push(task);
+      process.chdir(cwd);
       callback();
     });
   }
