@@ -9,10 +9,9 @@ var async = require('async');
 var path = require('path');
 var istextorbinary =  require('istextorbinary');
 
-var todoRegex = /^[\+|\-][\s]+[\W]*[\s]*TODO[\W|\s]*/i; // regex match for finding a TODO comment
-var labelRegex = /^\+[\s]+[\W]*[\s]*LABELS[\W|\s]*/i; // regex match for finding a LABELS comment
-var bodyRegex = /^\+[\s]+[\W]*[\s]*BODY[\W|\s]*/i; // regex match for finding a BODY comment
-
+var todoRegex = /^[\+|\-]?[\s]*[\W]*[\s]*TODO:[\W|\s]*/i; // regex match for finding a TODO comment
+var labelRegex = /^\+?[\s]*[\W]*[\s]*TODO-LABELS:[\W|\s]*/i; // regex match for finding a LABELS comment
+var bodyRegex = /^\+?[\s]*[\W]*[\s]*TODO-BODY:[\W|\s]*/i; // regex match for finding a BODY comment
 
 var isFile = function (path) {
   return fs.lstatSync(path).isFile();
@@ -22,12 +21,51 @@ var isTextFile = function (path) {
   return istextorbinary.isTextSync(path, fs.readFileSync(path));
 };
 
+var isTodo = function(str) {
+  return todoRegex.test(str);
+};
+
+var getTodoTitle = function(str) {
+  return str.split(todoRegex)[1];
+};
+
+var isTodoLabel = function(str) {
+  return labelRegex.test(str);
+};
+
+var isTodoBody = function(str) {
+  return bodyRegex.test(str);
+};
+
+var getTodoData = function(additions, idx) {
+  if (idx >= additions.length) { return null; }
+
+  var str = additions[idx];
+
+  if (isTodoLabel(str)) {
+    return ['labels', str.split(labelRegex)[1]];
+  } else if (isTodoBody(str)) {
+    return ['body', str.split(bodyRegex)[1]];
+  } else {
+    return null;
+  }
+};
+
+var getLabels = function (line) {
+  return line.split(labelRegex)[1];
+};
+
+var getBody = function (line) {
+  return line.split(bodyRegex)[1];
+};
+
 var gitBlameWorker = function (tempFolderPath, issueQueue) {
   return function (task, callback) {
     var cwd = process.cwd();
     process.chdir(tempFolderPath);
-    var blamePath = path.relative(tempFolderPath, task.path);
-    exec(['git', 'blame', '-L' + lineNum + ',+1', '--', blamePath], function (err, out, code) {
+    var gitPath = path.relative(tempFolderPath, task.path);
+    task.gitPath = gitPath;
+    exec(['git', 'blame', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
       // TODO: Make this prettier.
       var importantPart = out.substring(0, out.indexOf(')') + 1);
       task.blameMessage = importantPart;
@@ -40,7 +78,7 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
 var createIssueWorker = function (user) {
   return function (task, callback) {
     console.log('Run issue task: ', {
-      username: user.profile.login,
+      username: user.profile.username,
       task: task
     });
     callback();
@@ -50,19 +88,23 @@ var createIssueWorker = function (user) {
 var parseTodos = function (files) {
   var result = [];
   files.forEach(function (file) {
-    var regex = getRegex(file.path);
-    for (var lineNum = 1; lineNum <= file.lines.length; lineNum++) {
+    for (var lineNum = 0; lineNum < file.lines.length; lineNum++) {
       var line = file.lines[lineNum];
-      // TODO: Define isTodo, getTodoTitle, isLabel, getLabels, isBody, getBody
       if (isTodo(line)) {
+        console.log(file.path);
+        console.log('isTodo', line);
         result.push({
           title: getTodoTitle(line),
-          lineNum: lineNum,
+          lineNum: lineNum + 1,
           path: file.path
         });
-      } else if (isLabel(line)) {
+      } else if (isTodoLabel(line)) {
+        console.log(file.path);
+        console.log('isTodoLabel', line);
         result[result.length - 1].label = getLabels(line);
-      } else if (isBody(line)) {
+      } else if (isTodoBody(line)) {
+        console.log(file.path);
+        console.log('isTodoBody', line);
         result[result.length - 1].body = getBody(line);
       }
     }
@@ -81,7 +123,7 @@ var apiDone = function (res, next) {
 
 var addIssues = function (req, res, next) {
   var tempFolderPath = temp.mkdirSync('todobot');
-  var gitURL = 'https://'  + config.BOT_USERNAME + ':' + config.BOT_PASSWORD + '@github.com/FabioFleitas/todo.git';
+  var gitURL = 'https://'  + config.BOT_USERNAME + ':' + config.BOT_PASSWORD + '@github.com/' + req.user.profile.username + '/' + req.params.repo + '.git';
   exec(['git', 'clone', gitURL, tempFolderPath], function (err, out, code) {
     if (code !== 0) {
       return res.send({err: err, output: out, code: code});
@@ -99,15 +141,21 @@ var addIssues = function (req, res, next) {
         return {path: path, lines: fs.readFileSync(path, 'utf8').split('\n')};
       });
     var todos = parseTodos(files);
+    console.log('Parsed todos:', todos);
     var issueQueue = async.queue(createIssueWorker(req.user), 2);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), 5);
 
     issueQueue.drain = function () {
-      if (blameQueue.idle()) {
+      console.log('issue queue drained');
+      if (blameQueue.idle() || todos.length === 0) {
         apiDone(res, next)();
       }
     };
     blameQueue.push(todos);
+    blameQueue.drain = function () {
+      console.log('blame queue drained');
+    };
+    issueQueue.push([]);
   });
 };
 
@@ -118,11 +166,10 @@ exports.addRepo = function (req, res, next) {
     token: user.accessToken
   };
   var collaboratorData = {
-    user: user.profile.login,
+    user: user.profile.username,
     repo: req.params.repo,
     collabuser: config.BOT_USERNAME
   };
-  console.log('data', collaboratorData);
   github(authCreds).repos.addCollaborator(collaboratorData, function (err) {
     if (err) {
       return next(err);
@@ -134,36 +181,6 @@ exports.addRepo = function (req, res, next) {
     });
   });
 };
-
-var isTodo = function(str) {
-  return todoRegex.test(str);
-}
-
-var getTodoTitle = function(str) {
-  return str.split(todoRegex)[1];
-}
-
-var isTodoLabel = function(str) {
-  return labelRegex.test(str);
-}
-
-var isTodoBody = function(str) {
-  return bodyRegex.test(str);
-}
-
-var getTodoData = function(additions, idx) {
-  if (idx >= additions.length) { return null; }
-
-  var str = additions[idx];
-
-  if (isTodoLabel(str)) {
-    return ['labels', str.split(labelRegex)[1]];
-  } else if (isTodoBody(str)) {
-    return ['body', str.split(bodyRegex)[1]];
-  } else {
-    return null;
-  }
-}
 
 var getTodos = function(additions) {
   var todos = [];
@@ -249,16 +266,11 @@ var webhookPushHandler = function(data) {
       }
     }
 
-    console.log(additions);
-    console.log(subtractions);
-
     newTodos = getTodos(additions);
-    console.log("New Todos");
-    console.log(newTodos);
+    console.log('New Todos: ', newTodos);
 
     removedTodos = getRemovedTodos(subtractions);
-    console.log("Removed Todos");
-    console.log(removedTodos);
+    console.log('Removed Todos: ', removedTodos);
 
   });
 }

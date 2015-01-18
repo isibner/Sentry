@@ -86,7 +86,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.use(logger('dev'));
+  // app.use(logger('dev'));
   app.use('/static', express.static(config.root + '/public'));
 
   app.use('/', require('./routes/landing'));

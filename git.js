@@ -18,25 +18,6 @@ var githubClientSecret = 'not the secret';
 
 var token = '';
 
-// github.authenticate({
-//  type: 'basic',
-//  username: 'FabioFleitas',
-//  password: 'this isnt my actual pass lol', 
-// });
-
- // msg = {
- //      user: 'FabioFleitas',
- //      repo: 'todo',
- //      title: 'Test Issue',
- //      body: 'Wow such body @FabioFleitas',
- //      labels: [],
- //    }
- //    github.issues.create(msg, function(err, res) {
- //      console.log(err);
- //      console.log('wow in da middle');
- //      console.log(res);
- //    });
-
 github.authorization.create({
   scopes: ["user", "public_repo", "repo", "repo:status", "gist"],
   note: "what this auth is for",
