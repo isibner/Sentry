@@ -1,7 +1,7 @@
 <div class="container">
-  <div class="row">
+  <div class="row mt centered">
     <div class="col-xs-12">
-      <h1 class="text-center"><code>// TODO</code></h1>
+      <h1 class="text-center"><code>// TODO: Watch Some Repositories</code></h1>
     </div>
   </div>
 
@@ -14,21 +14,18 @@
   
 
 
-  <div class="row">
-    <div class="col-xs-offset-4 col-xs-4">
-      {{#each userRepos}}
-        <div class="row mt centered">
+  {{#each userRepos}}
+    <div class="row mt centered">
 
-          <div class="col-sm-3 col-sm-offset-3">
-            <h4>{{name}}</h4>
-          </div>
+      <div class="col-sm-3 col-sm-offset-3">
+        <h4>{{name}}</h4>
+      </div>
 
-          <div class="col-sm-3">
-            <button data-repo="{{name}}" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
-          </div>
-        </div>
-      {{/each}}
+      <div class="col-sm-3">
+        <button data-repo="{{name}}" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
+      </div>
     </div>
-  </div>
+  {{/each}}
+
 
 </div>

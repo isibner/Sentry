@@ -85,7 +85,7 @@ var createIssueWorker = function (user) {
   };
 };
 
-var parseTodos = function (files) {
+var parseTodos = function (files, repo) {
   var result = [];
   files.forEach(function (file) {
     for (var lineNum = 0; lineNum < file.lines.length; lineNum++) {
@@ -96,7 +96,8 @@ var parseTodos = function (files) {
         result.push({
           title: getTodoTitle(line),
           lineNum: lineNum + 1,
-          path: file.path
+          path: file.path,
+          repo: repo
         });
       } else if (isTodoLabel(line)) {
         console.log(file.path);
@@ -140,7 +141,7 @@ var addIssues = function (req, res, next) {
       .map(function (path) {
         return {path: path, lines: fs.readFileSync(path, 'utf8').split('\n')};
       });
-    var todos = parseTodos(files);
+    var todos = parseTodos(files, req.params.repo);
     console.log('Parsed todos:', todos);
     var issueQueue = async.queue(createIssueWorker(req.user), 2);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), 5);
