@@ -68,7 +68,7 @@ var getTodoData = function(additions, idx) {
 }
 
 var getTodos = function(additions) {
-  var todos = []
+  var todos = [];
 
   for (var i = 0; i < additions.length; i++) {
     var addition = additions[i];
@@ -88,6 +88,25 @@ var getTodos = function(additions) {
       todos.push(todo);
     }
   }
+
+  return todos;
+}
+
+var getRemovedTodos = function(subtractions) {
+  var todos = [];
+
+  for (var i = 0; i < subtractions.length; i++) {
+    var subtraction = subtractions[i];
+    if (isTodo(subtraction)) {
+      var todo = {
+        title: getTodoTitle(subtraction),
+      };
+
+      todos.push(todo);
+    }
+  }
+
+  return todos;
 }
 
 var webhookPushHandler = function(data) {
@@ -130,11 +149,16 @@ var webhookPushHandler = function(data) {
       }
     }
 
-    console.log(additions);
-    console.log(subtractions);
+    // console.log(additions);
+    // console.log(subtractions);
 
     newTodos = getTodos(additions);
+    console.log("New Todos");
     console.log(newTodos);
+
+    removedTodos = getRemovedTodos(subtractions);
+    console.log("Removed Todos");
+    console.log(removedTodos);
 
   });
 }
