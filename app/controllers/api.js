@@ -208,11 +208,8 @@ var getRemovedTodos = function(subtractions) {
 }
 
 var createNewIssues = function(todos, user, repo) {
-  console.log("yo yo yo!");
-  console.log(todos);
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
-    console.log(todo);
 
     var authCreds = {
       type: 'basic',
@@ -224,7 +221,7 @@ var createNewIssues = function(todos, user, repo) {
       user: user,
       repo: repo,
       title: todo.title,
-      // body: todo.body,
+      body: todo.body || '',
       // TODO: update ova here!
       labels: ['todo'],
     };
