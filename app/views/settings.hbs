@@ -21,11 +21,11 @@
 	<div class="row mt centered">
 
 		<div class="col-sm-3 col-sm-offset-3">
-			<h4>todo</h4>
+			<h4>todo-test</h4>
 		</div>
 
 		<div class="col-sm-3">
-			<button data-repo="todo" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
+			<button data-repo="todo-test" data-action="add" class="btn btn-default btn-repo"><i class="fa fa-plus"></i> Add</button>
 		</div>
 	</div>
 
@@ -72,22 +72,14 @@
 						swal('Deleted!', 'Your imaginary file has been deleted.', 'success'); 
 					});
 			} else if (action === 'add') {
-				data = {
-					repo: repo,
-				}
-
 				$.ajax({
 				  type: 'POST',
-				  url: '/',
-				  dataType: 'json',
-				  data: data,
+				  url: '/api/addRepo/' + repo,
 				  success: function(data) {
 				  	console.log(data);
-				  	alert('Success!');
 				  },
 				  error: function(data) {
 				  	console.log(data);
-				  	alert("Error!");
 				  }
 				});
 			}

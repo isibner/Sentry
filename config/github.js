@@ -10,7 +10,7 @@ module.exports = function githubAuthenticate (params) {
     parthPrefix: '/api/v3', // for some GHEs
     timeout: 5000,
     headers: {
-      'user-agent': 'AutoToDo',
+      'user-agent': 'TodoBot',
     }
   });
 
