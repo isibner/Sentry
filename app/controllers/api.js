@@ -222,7 +222,7 @@ var createNewIssues = function(todos, user, repo) {
       repo: repo,
       title: todo.title,
       body: todo.body,
-      // TODO: update `msg.labels` in `createNewIssues`
+      // TODO: update right here!
       labels: ['todo'],
     };
 
