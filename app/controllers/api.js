@@ -224,31 +224,99 @@ var getRemovedTodos = function(subtractions) {
   return todos;
 }
 
-var createNewIssues = function(todos, user, repo) {
+var createTodoIssue = function(todo, user, repo) {
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  msg = {
+    user: user,
+    repo: repo,
+    title: todo.title,
+    body: todo.body || '',
+    // TODO: update ova here!
+    labels: ['todo'],
+  };
+
+  github(authCreds).issues.create(msg, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+}
+
+var createTodoIssues = function(todos, user, repo) {
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
 
-    var authCreds = {
-      type: 'basic',
-      username: config.BOT_USERNAME,
-      password: config.BOT_PASSWORD,
-    };
+    createTodoIssue(todo, user, repo);
+  }
+}
 
-    msg = {
-      user: user,
-      repo: repo,
-      title: todo.title,
-      body: todo.body || '',
-      // TODO: update ova here!
-      labels: ['todo'],
-    };
+var getIssueNumber = function(title, user, repo) {
+  if (title === null) { return null; }
 
-    console.log(msg);
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
 
-    github(authCreds).issues.create(msg, function(err, res) {
-      console.log("wow I got here!");
-    });
+  msg = {
+    user: user,
+    repo: repo,
+    state: 'open',
+    labels: 'todo',
+    per_page: 100,
+  };
 
+  github(authCreds).issues.repoIssues(msg, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+}
+
+var closeTodoIssue = function(todo, user, repo) {
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  var issueNumber = getIssueNumber(todo.title, user, repo);
+
+  return;
+
+  msg = {
+    user: user,
+    repo: repo,
+    title: todo.title,
+    body: todo.body || '',
+    // TODO: update ova here!
+    labels: ['todo'],
+  };
+
+  github(authCreds).issues.create(msg, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+}
+
+var closeTodoIssues = function(todos, user, repo) {
+  for (var i = 0; i < todos.length; i++) {
+    var todo = todos[i];
+
+    removeTodoIssue(todo, user, repo);
   }
 }
 
@@ -301,7 +369,7 @@ var webhookPushHandler = function(data) {
     removedTodos = getRemovedTodos(subtractions);
     console.log('Removed Todos: ', removedTodos);
 
-    createNewIssues(newTodos, repoOwner, repoName);
+    createTodoIssues(newTodos, repoOwner, repoName);
 
   });
 }
