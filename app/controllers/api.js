@@ -67,7 +67,7 @@ var gitBlameWorker = function (tempFolderPath, issueQueue) {
     task.gitPath = gitPath;
     exec(['git', 'blame', '-L' + task.lineNum + ',+1', '--', gitPath], function (err, out, code) {
       // TODO: Make this prettier.
-      var importantPart = out.substring(0, out.indexOf(')') + 1);
+      var importantPart = out.substring(1, out.indexOf(')') + 1);
       task.blameMessage = importantPart;
       issueQueue.push(task);
       callback();
@@ -224,7 +224,7 @@ var getRemovedTodos = function(subtractions) {
   return todos;
 }
 
-var createTodoIssue = function(todo, user, repo) {
+var createTodoIssue = function(todo, user, repo, callback) {
   var authCreds = {
     type: 'basic',
     username: config.BOT_USERNAME,
@@ -236,25 +236,20 @@ var createTodoIssue = function(todo, user, repo) {
     repo: repo,
     title: todo.title,
     body: todo.body || '',
-    // TODO: update ova here!
-    labels: ['todo'],
+    labels: ['todo']
   };
 
-  github(authCreds).issues.create(msg, function(err, res) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(res);
-    }
-  });
+  github(authCreds).issues.create(msg, callback);
 }
 
-var createTodoIssues = function(todos, user, repo) {
-  for (var i = 0; i < todos.length; i++) {
-    var todo = todos[i];
+var createTodoIssues = function(todos, user, repo, callback) {
+  var todoCreatorWorker = function (todo, workerCallback) {
+    createTodoIssue(todo, user, repo, workerCallback);
+  };
+  var q = async.queue(todoCreatorWorker, 2);
+  q.drain = callback;
 
-    createTodoIssue(todo, user, repo);
-  }
+  q.push(todos);
 }
 
 var getIssueNumber = function(title, user, repo) {
@@ -320,7 +315,7 @@ var closeTodoIssues = function(todos, user, repo) {
   }
 }
 
-var webhookPushHandler = function(data) {
+var webhookPushHandler = function(data, callback) {
   var authCreds = {
     type: 'basic',
     username: config.BOT_USERNAME,
@@ -369,7 +364,7 @@ var webhookPushHandler = function(data) {
     removedTodos = getRemovedTodos(subtractions);
     console.log('Removed Todos: ', removedTodos);
 
-    createTodoIssues(newTodos, repoOwner, repoName);
+    createTodoIssues(newTodos, repoOwner, repoName, callback);
 
   });
 }
@@ -377,6 +372,6 @@ var webhookPushHandler = function(data) {
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
   // console.log(req);
-  webhookPushHandler(req.body);
-  apiDone(res, next)();
+  webhookPushHandler(req.body, apiDone(res, next));
+  
 };
