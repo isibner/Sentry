@@ -252,6 +252,7 @@ var webhookPushHandler = function(data) {
 
   var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
     // var author = res.author.login;
+    console.log(res);
     var files = res.files;
 
     // go thru each files, find the patches, and separate the additions from subtractions in file
