@@ -15,16 +15,5 @@ var isFile = function (path) {
 
 router.post('/addRepo/:repo', api.addRepo);
 router.post('/webhook/all', api.webhookAll);
-router.get('/cloneThing', function (req, res, next) {
-  var tempFolderPath = temp.mkdirSync('todobot');
-  var gitURL = 'https://'  + config.BOT_USERNAME + ':' + config.BOT_PASSWORD + '@github.com/FabioFleitas/todo.git';
-  exec(['git', 'clone', gitURL, tempFolderPath], function (err, out, code) {
-    if (code !== 0) {
-      return res.send({err: err, output: out, code: code});
-    }
-    var files = walkSync(tempFolderPath).filter(isFile);
-    res.send(files);
-  });
-});
 
 module.exports = router;
