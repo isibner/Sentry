@@ -2,34 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>//Todo</title>
+  <title>// TodoBot</title>
   <meta name="description" content="">
   <meta name="author" content="">
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600|Lato:300,400,900' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="/static/css/normalize.css">
   <link rel="stylesheet" href="/static/css/bootstrap.css">
   <link rel="stylesheet" href="/static/css/bootstrap-social.css">
   <link rel="stylesheet" href="/static/css/font-awesome.css">
 
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/static/css/theme.css">
+
+  <!-- Sweet Alert -->
+  <link rel="stylesheet" href="/static/css/sweet-alert.css">  
+
+  <style type="text/css">
+    .header-img {
+      margin: 0 auto;
+      display: block;
+      max-width: 400px;
+    }
+
+    #headerwrap {
+      padding-top: 100px;
+      min-height: initial;
+      padding-bottom: 50px;
+    }
+
+    #headerwrap h1 {
+      text-shadow: 0px 2px 2px rgba(0,0,0,0.15);
+    }
+
+    #headerwrap h2 {
+      color: white;
+      text-shadow: 0px 2px 2px rgba(0,0,0,0.15);
+    }
+
+    #headerwrap i {
+      margin: 0;
+      color: white;
+    }
+
+    #headerwrap .header-btn {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    .btn-repo {
+      min-width: 100px;
+    }
+
+    .navbar-fixed-top {
+      z-index: 1;
+    }
+  </style>
+
   <link rel="icon" type="image/png" href="images/favicon.png" />
 </head>
 <body>
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-12" style="margin-top: 5%">
-        {{#errorFlashes}}
-          <p>Error: {{.}}</p>
-        {{/errorFlashes}}
-        {{#successFlashes}}
-          <p>Success: {{.}}</p>
-        {{/successFlashes}}
+  <!-- Fixed navbar -->
+  <div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/"><b>// TODOBOT</b></a>
       </div>
     </div>
-    {{{body}}}
   </div>
+
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/sweet-alert.min.js"></script>
+
+  {{{body}}}
+
+  <div class="container">
+    <hr>
+    <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> & <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a></p>
+  </div>
+
 </body>
 </html>
