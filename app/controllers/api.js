@@ -9,6 +9,10 @@ var async = require('async');
 var path = require('path');
 var istextorbinary =  require('istextorbinary');
 
+var todoRegex = /^[\+|\-][\s]+[\W]*[\s]*TODO[\W|\s]*/i; // regex match for finding a TODO comment
+var labelRegex = /^\+[\s]+[\W]*[\s]*LABELS[\W|\s]*/i; // regex match for finding a LABELS comment
+var bodyRegex = /^\+[\s]+[\W]*[\s]*BODY[\W|\s]*/i; // regex match for finding a BODY comment
+
 
 var isFile = function (path) {
   return fs.lstatSync(path).isFile();
@@ -131,8 +135,137 @@ exports.addRepo = function (req, res, next) {
   });
 };
 
+var isTodo = function(str) {
+  return todoRegex.test(str);
+}
+
+var getTodoTitle = function(str) {
+  return str.split(todoRegex)[1];
+}
+
+var isTodoLabel = function(str) {
+  return labelRegex.test(str);
+}
+
+var isTodoBody = function(str) {
+  return bodyRegex.test(str);
+}
+
+var getTodoData = function(additions, idx) {
+  if (idx >= additions.length) { return null; }
+
+  var str = additions[idx];
+
+  if (isTodoLabel(str)) {
+    return ['labels', str.split(labelRegex)[1]];
+  } else if (isTodoBody(str)) {
+    return ['body', str.split(bodyRegex)[1]];
+  } else {
+    return null;
+  }
+}
+
+var getTodos = function(additions) {
+  var todos = [];
+
+  for (var i = 0; i < additions.length; i++) {
+    var addition = additions[i];
+    if (isTodo(addition)) {
+      var todo = {
+        title: getTodoTitle(addition),
+      };
+
+      var idx = i+1;
+      var data = getTodoData(additions, idx);
+      while (data != null) {
+        todo[data[0]] = data[1];
+        idx++;
+        var data = getTodoData(additions, idx);
+      }
+
+      todos.push(todo);
+    }
+  }
+
+  return todos;
+}
+
+var getRemovedTodos = function(subtractions) {
+  var todos = [];
+
+  for (var i = 0; i < subtractions.length; i++) {
+    var subtraction = subtractions[i];
+    if (isTodo(subtraction)) {
+      var todo = {
+        title: getTodoTitle(subtraction),
+      };
+
+      todos.push(todo);
+    }
+  }
+
+  return todos;
+}
+
+var webhookPushHandler = function(data) {
+  var authCreds = {
+    type: 'basic',
+    username: config.BOT_USERNAME,
+    password: config.BOT_PASSWORD,
+  };
+
+  var repoOwner = data.repository.owner.name;
+  var repoName = data.repository.name;
+  var commitShaBefore = data.before;
+  var commitShaAfter = data.after;
+
+  var msg = {
+    user: repoOwner,
+    repo: repoName,
+    base: commitShaBefore,
+    head: commitShaAfter,
+  }
+
+  var additions = [];
+  var subtractions = [];
+
+  var commit = github(authCreds).repos.compareCommits(msg, function(err, res) {
+    // var author = res.author.login;
+    var files = res.files;
+
+    // go thru each files, find the patches, and separate the additions from subtractions in file
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var patch = file.patch.split('\n');
+
+      for (var j = 0; j < patch.length; j++) {
+        var line = patch[j];
+
+        if (line.lastIndexOf('+', 0) === 0) {
+          additions.push(line);
+        } else if (line.lastIndexOf('-', 0) === 0) {
+          subtractions.push(line);
+        }
+      }
+    }
+
+    console.log(additions);
+    console.log(subtractions);
+
+    newTodos = getTodos(additions);
+    console.log("New Todos");
+    console.log(newTodos);
+
+    removedTodos = getRemovedTodos(subtractions);
+    console.log("Removed Todos");
+    console.log(removedTodos);
+
+  });
+}
+
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
-  console.log(req.body);
+  // console.log(req);
+  webhookPushHandler(req.body);
   apiDone(res, next)();
 };
