@@ -40,7 +40,7 @@ var isTodoBody = function(str) {
 var getTodoData = function(additions, idx) {
   if (idx >= additions.length) { return null; }
 
-  var str = additions[idx];
+  var str = additions[idx].line;
 
   if (isTodoLabel(str)) {
     var labels = str.split(labelRegex)[1].split(', ');
