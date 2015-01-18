@@ -40,7 +40,7 @@ var isTodoBody = function(str) {
 var getTodoData = function(additions, idx) {
   if (idx >= additions.length) { return null; }
 
-  var str = additions[idx];
+  var str = additions[idx].line;
 
   if (isTodoLabel(str)) {
     var labels = str.split(labelRegex)[1].split(', ');
@@ -265,15 +265,14 @@ var createTodoIssues = function(todos, user, repo, callback) {
   q.push(todos);
 }
 
-var getIssueNumber = function(title, user, repo) {
-  if (title === null) { return null; }
-
+var closeTodoIssue = function(todo, user, repo, callback) {
   var authCreds = {
     type: 'basic',
     username: config.BOT_USERNAME,
     password: config.BOT_PASSWORD,
   };
 
+  // get the issue number first
   msg = {
     user: user,
     repo: repo,
@@ -287,44 +286,52 @@ var getIssueNumber = function(title, user, repo) {
       console.log(err);
     } else {
       console.log(res);
+
+      var issueNumber = null;
+      var issues = res;
+      for (var i = 0; i < issues.length; i++) {
+        var issue = issues[i];
+
+        if (issue.title == todo.title) {
+          issueNumber = issue.number;
+          break;
+        }
+      }
+
+      if (issueNumber != null) {
+        msg = {
+          user: user,
+          repo: repo,
+          number: issueNumber,
+          state: 'closed'
+        };
+
+        github(authCreds).issues.edit(msg, function(err, res) {
+          console.log(res);
+        });
+
+        var body = 'Completed task.' + '\n\n---\n' + 'Completed in ' + todo.sha + ' by ' + todo.name + '. See ' + todo.fileref + '.';
+
+        msg = {
+          user: user,
+          repo: repo,
+          number: issueNumber,
+          body: body,
+        };
+
+        github(authCreds).issues.createComment(msg, function(err, res) {
+          console.log(res);
+        });
+      }
     }
   });
 }
 
-var closeTodoIssue = function(todo, user, repo) {
-  var authCreds = {
-    type: 'basic',
-    username: config.BOT_USERNAME,
-    password: config.BOT_PASSWORD,
-  };
-
-  var issueNumber = getIssueNumber(todo.title, user, repo);
-
-  return;
-
-  msg = {
-    user: user,
-    repo: repo,
-    title: todo.title,
-    body: todo.body || '',
-    // TODO: update ova here!
-    labels: ['todo'],
-  };
-
-  github(authCreds).issues.create(msg, function(err, res) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(res);
-    }
-  });
-}
-
-var closeTodoIssues = function(todos, user, repo) {
+var closeTodoIssues = function(todos, user, repo, callback) {
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
 
-    removeTodoIssue(todo, user, repo);
+    closeTodoIssue(todo, user, repo, callback);
   }
 }
 
@@ -374,9 +381,9 @@ var webhookPushHandler = function(data, callback) {
         } else if (line.lastIndexOf('-', 0) === 0) {
           subtractions.push({
             line: line,
-            sha: file.sha,
+            sha: commitShaAfter,
             filename: file.filename,
-            fileref: file.blob_url,
+            fileref: '[' + file.filename + '](' + file.blob_url + ')',
             name: '@' + res.base_commit.committer.login,
           });
         }
@@ -390,6 +397,7 @@ var webhookPushHandler = function(data, callback) {
     console.log('Removed Todos: ', removedTodos);
 
     createTodoIssues(newTodos, repoOwner, repoName, callback);
+    closeTodoIssues(removedTodos, repoOwner, repoName, callback);
 
   });
 }
