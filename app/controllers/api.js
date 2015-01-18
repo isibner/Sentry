@@ -265,15 +265,14 @@ var createTodoIssues = function(todos, user, repo, callback) {
   q.push(todos);
 }
 
-var getIssueNumber = function(title, user, repo) {
-  if (title === null) { return null; }
-
+var closeTodoIssue = function(todo, user, repo, callback) {
   var authCreds = {
     type: 'basic',
     username: config.BOT_USERNAME,
     password: config.BOT_PASSWORD,
   };
 
+  // get the issue number first
   msg = {
     user: user,
     repo: repo,
@@ -289,42 +288,30 @@ var getIssueNumber = function(title, user, repo) {
       console.log(res);
     }
   });
+
+  // msg = {
+  //   user: user,
+  //   repo: repo,
+  //   title: todo.title,
+  //   body: todo.body || '',
+  //   // TODO: update ova here!
+  //   labels: ['todo'],
+  // };
+
+  // github(authCreds).issues.create(msg, function(err, res) {
+  //   if (err) {
+  //     console.log(err);
+  //   } else {
+  //     console.log(res);
+  //   }
+  // });
 }
 
-var closeTodoIssue = function(todo, user, repo) {
-  var authCreds = {
-    type: 'basic',
-    username: config.BOT_USERNAME,
-    password: config.BOT_PASSWORD,
-  };
-
-  var issueNumber = getIssueNumber(todo.title, user, repo);
-
-  return;
-
-  msg = {
-    user: user,
-    repo: repo,
-    title: todo.title,
-    body: todo.body || '',
-    // TODO: update ova here!
-    labels: ['todo'],
-  };
-
-  github(authCreds).issues.create(msg, function(err, res) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(res);
-    }
-  });
-}
-
-var closeTodoIssues = function(todos, user, repo) {
+var closeTodoIssues = function(todos, user, repo, callback) {
   for (var i = 0; i < todos.length; i++) {
     var todo = todos[i];
 
-    removeTodoIssue(todo, user, repo);
+    removeTodoIssue(todo, user, repo, callback);
   }
 }
 
@@ -390,6 +377,7 @@ var webhookPushHandler = function(data, callback) {
     console.log('Removed Todos: ', removedTodos);
 
     createTodoIssues(newTodos, repoOwner, repoName, callback);
+    closeTodoIssues(removedTodos, callback);
 
   });
 }
