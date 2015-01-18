@@ -36,6 +36,6 @@ exports.addRepo = function (req, res, next) {
 
 exports.webhookAll = function (req, res, next) {
   console.log('Webhook!');
-  console.log(JSON.stringify(util.inspect(req)));
+  console.log(req);
   apiDone(res, next)();
 }
