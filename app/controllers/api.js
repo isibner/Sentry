@@ -174,7 +174,7 @@ exports.addRepo = function (req, res, next) {
     if (err) {
       return next(err);
     }
-    var msg = {
+    var hookData = {
       user: user.profile.username,
       repo: req.params.repo,
       name: 'web',
@@ -186,7 +186,7 @@ exports.addRepo = function (req, res, next) {
         insecure_ssl: 1
       }
     };
-    github(authCreds).repos.createHook(msgs, function (err) {
+    github(authCreds).repos.createHook(hookData, function (err) {
       if (err) {
         return next(err);
       }
@@ -195,7 +195,7 @@ exports.addRepo = function (req, res, next) {
       user.save(function (err) {
         addIssues(req, res, next);
       });
-    });
+    }); 
   });
 };
 
