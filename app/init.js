@@ -1,5 +1,4 @@
-var logger = require('morgan'),
-    path = require('path'),
+var path = require('path'),
     config = require('../config/config'),
     express = require('express'),
     bodyParser = require('body-parser'),
@@ -55,7 +54,7 @@ module.exports = function (app) {
   passport.use(new GitHubStrategy({
       clientID: config.GITHUB_CLIENT_ID,
       clientSecret: config.GITHUB_CLIENT_SECRET,
-      callbackURL: "https://pennapps-todo.herokuapp.com/auth/github/callback"
+      callbackURL: 'https://pennapps-todo.herokuapp.com/auth/github/callback'
     },
     function (accessToken, refreshToken, profile, done) {
       User.findOrCreate({
@@ -65,6 +64,9 @@ module.exports = function (app) {
         accessToken: accessToken,
         refreshToken: refreshToken
       }, function (err, user) {
+        if (err) {
+          done(err);
+        }
         user.profile = profile;
         user.accessToken = accessToken;
         user.refreshToken = refreshToken;
@@ -81,7 +83,7 @@ module.exports = function (app) {
     User.findOne({'profile.id': id}).exec(done);
   });
 
-  app.use(function(req, res, next) {
+  app.use(function (req, res, next) {
     res.locals.successFlashes = req.flash('success');
     res.locals.errorFlashes = req.flash('error');
 

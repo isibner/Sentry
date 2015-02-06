@@ -1,31 +1,14 @@
-module.exports = function(grunt) {
-  grunt.loadNpmTasks('grunt-eslint');
-  grunt.loadNpmTasks('grunt-nodemon');
-  grunt.loadNpmTasks('grunt-githooks');
+module.exports = function (grunt) {
+  require('load-grunt-tasks')(grunt);
 
   grunt.initConfig({
     eslint: {
       options: {
-        config: '.eslintrc'
+        rulePaths: ['.eslint_rules']
       },
-      target: [
-        'server.js',
-        'app/**/*.js',
-        'config/**/*.js',
-        'lib/**/*.js'
-      ]
-    },
-    nodemon: {
-      dev: {
-        script: 'server.js'
-      }
-    },
-    githooks: {
-      all: {
-        'pre-commit': 'eslint',
-      }
+      target: ['*.js', 'config/**/*.js', 'app/**/*.js']
     }
   });
 
-  grunt.registerTask('default', ['nodemon']);
+  grunt.registerTask('default', ['eslint']);
 };

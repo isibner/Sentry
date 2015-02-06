@@ -1,6 +1,4 @@
-var github = require('../../config/github');
-
-exports.index = function (req, res, next) {
+exports.index = function (req, res) {
   return res.render('landing');
 };
 
@@ -16,18 +14,18 @@ exports.getUserRepos = function getUserRepos(req, res, next) {
        return repo;
     });
     next();
-  })
-}
+  });
+};
 
-exports.settings = function(req, res) {
+exports.settings = function (req, res) {
   return res.render('settings');
-}
+};
 
-exports.login = function(req, res) {
+exports.login = function (req, res) {
   return res.render('login');
 };
 
-exports.logout = function(req, res) {
+exports.logout = function (req, res) {
   req.logout();
   req.flash('success', 'Logged out successfully!');
   return res.redirect('/');
