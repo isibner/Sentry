@@ -6,7 +6,7 @@ module.exports = function (grunt) {
       options: {
         rulePaths: ['.eslint_rules']
       },
-      target: ['*.js', 'config/**/*.js', 'app/**/*.js']
+      target: ['*.js', 'config/**/*.js', 'utils/*', 'app/**/*.js']
     }
   });
 

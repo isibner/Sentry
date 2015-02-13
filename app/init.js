@@ -65,8 +65,10 @@ module.exports = function (app) {
         refreshToken: refreshToken
       }, function (err, user) {
         if (err) {
+          console.log('Err here');
           done(err);
         }
+        console.log("access token = " + accessToken);
         user.profile = profile;
         user.accessToken = accessToken;
         user.refreshToken = refreshToken;

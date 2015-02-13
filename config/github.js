@@ -6,8 +6,7 @@ module.exports = function githubAuthenticate (params) {
 
     debug: true,
     protocol: 'https',
-    //host: '', // not sure about this one
-    pathPrefix: '/api/v3', // for some GHEs
+    host: 'api.github.com',
     timeout: 5000,
     headers: {
       'user-agent': 'TodoBot'
