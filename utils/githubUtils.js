@@ -3,6 +3,8 @@ var config = require('../config/config');
 
 var async = require('async');
 
+var ISSUE_QUEUE_SIZE = 1;
+
 var createTodoIssue = module.exports.createTodoIssue = function (todo, user, repo, callback) {
   var authCreds = {
     type: 'basic',
@@ -98,7 +100,7 @@ module.exports.createTodoIssues = function (todos, user, repo, callback) {
   var todoCreatorWorker = function (todo, workerCallback) {
     createTodoIssue(todo, user, repo, workerCallback);
   };
-  var q = async.queue(todoCreatorWorker, 2);
+  var q = async.queue(todoCreatorWorker, ISSUE_QUEUE_SIZE);
   q.drain = callback;
 
   q.push(todos);
@@ -108,7 +110,7 @@ module.exports.closeTodoIssues = function (todos, user, repo, callback) {
   var todoDestroyerWorker = function (todo, workerCallback) {
     closeTodoIssue(todo, user, repo, workerCallback);
   };
-  var q = async.queue(todoDestroyerWorker, 2);
+  var q = async.queue(todoDestroyerWorker, ISSUE_QUEUE_SIZE);
   q.drain = callback;
 
   q.push(todos);

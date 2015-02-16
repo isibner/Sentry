@@ -10,6 +10,9 @@ var fs = require('fs');
 var async = require('async');
 var path = require('path');
 
+var ISSUE_QUEUE_SIZE = 1;
+var BLAME_QUEUE_SIZE = 5;
+
 var gitBlameWorker = function (tempFolderPath, issueQueue) {
   return function (task, callback) {
     var cwd = process.cwd();
@@ -80,8 +83,8 @@ module.exports = function (req, res) {
       });
     var todos = parseTodos(files, req.params.repo);
     console.log('Parsed todos:', todos);
-    var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), 2);
-    var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), 5);
+    var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), ISSUE_QUEUE_SIZE);
+    var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), BLAME_QUEUE_SIZE);
 
     issueQueue.drain = function () {
       console.log('issue queue drained');
