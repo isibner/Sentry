@@ -35,16 +35,12 @@ module.exports.addRepo = function (req, res, next) {
       }
       user.repos = user.repos || [];
       user.repos.push(req.params.repo);
-      user.save(function (userSaveError) {
-        next(userSaveError);
-      });
+      user.save(next);
     });
   });
 };
 
-// TODO: Take out console.logs
 module.exports.webhookAll = function (req, res, next) {
-  console.log('Webhook!');
   if (req.get('X-GitHub-Event') === 'ping') {
     res.send({success: true});
   } else {

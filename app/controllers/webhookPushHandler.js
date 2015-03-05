@@ -108,7 +108,6 @@ module.exports = function (data, callback) {
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
       var patch = file.patch.split('\n');
-      console.log('patch = ' + patch);
 
       for (var j = 0; j < patch.length; j++) {
         var line = patch[j];
@@ -134,10 +133,7 @@ module.exports = function (data, callback) {
     }
 
     var newTodos = getTodos(additions);
-    console.log('New Todos: ', newTodos);
-
     var removedTodos = getRemovedTodos(subtractions);
-    console.log('Removed Todos: ', removedTodos);
 
     // TODO: Handle todo creation error
     githubUtils.createTodoIssues(newTodos, repoOwner, repoName, function () {

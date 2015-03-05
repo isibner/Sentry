@@ -54,7 +54,6 @@ var closeTodoIssue = module.exports.closeTodoIssue = function (todo, user, repo,
 
       var issueNumber = null;
       var issues = res;
-      console.log('issues = ' + issues);
       for (var i = 0; i < issues.length; i++) {
         var issue = issues[i];
 

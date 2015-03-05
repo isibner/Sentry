@@ -82,19 +82,15 @@ module.exports = function (req, res) {
         return {path: filePath, lines: fs.readFileSync(filePath, 'utf8').split('\n')};
       });
     var todos = parseTodos(files, req.params.repo);
-    console.log('Parsed todos:', todos);
     var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), ISSUE_QUEUE_SIZE);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), BLAME_QUEUE_SIZE);
 
     issueQueue.drain = function () {
-      console.log('issue queue drained');
       if (blameQueue.idle() || todos.length === 0) {
         res.send({success: true});
       }
     };
-    blameQueue.drain = function () {
-      console.log('blame queue drained');
-    };
+    blameQueue.drain = function () {};
 
     blameQueue.push(todos);
     issueQueue.push([]);
