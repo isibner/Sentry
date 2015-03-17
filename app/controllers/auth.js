@@ -1,12 +1,12 @@
 var passport = require('passport');
 
-exports.github = passport.authenticate('github', {scope: 'repo, write:repo_hook'});
+exports.github = passport.authenticate('github', {scope: 'repo, admin:repo_hook'});
 
 exports.noop = function () {};
 
 exports.githubCallback = passport.authenticate('github', {
   failureRedirect: '/login',
-  scope: 'repo, write:repo_hook'
+  scope: 'repo, admin:repo_hook'
 });
 
 exports.githubCallbackResolution = function (req, res) {

@@ -28,6 +28,9 @@ module.exports = function (app) {
       addOrRemove: function () {
         return this.todoBotActive ? 'remove' : 'add';
       },
+      isRemove: function () {
+        return this.todoBotActive;
+      },
       addOrRemoveCaps: function () {
         return this.todoBotActive ? 'Remove' : 'Add';
       }

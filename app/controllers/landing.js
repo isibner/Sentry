@@ -2,16 +2,21 @@ exports.index = function (req, res) {
   return res.render('landing');
 };
 
-exports.getUserRepos = function getUserRepos(req, res, next) {
+module.exports.getUserRepos = function getUserRepos(req, res, next) {
   req.user.findOwnRepos(function (err, repos) {
     if (err) {
       return next(err);
     }
     res.locals.userRepos = repos.map(function (repo) {
-       if (req.user.repos && req.user.repos.indexOf(repo.name) !== -1) {
-        repo.todoBotActive = true;
-       }
-       return repo;
+      if (req.user.repos) {
+        var repoNames = req.user.repos.map(function (r) {
+          return r.name;
+        });
+        if (repoNames.indexOf(repo.name) !== -1) {
+          repo.todoBotActive = true;
+        }
+      }
+      return repo;
     });
     next();
   });

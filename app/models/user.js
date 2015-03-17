@@ -13,7 +13,7 @@ var UserSchema = new Schema({
     type: String,
     required: true
   },
-  repos: [String]
+  repos: [{name: String, hookId: String}]
 });
 
 UserSchema.plugin(findOrCreate);
