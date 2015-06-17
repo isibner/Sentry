@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var ghUtils = require('../../utils/githubUtils');
 var authCreds = ghUtils.authCreds;
-var botAuthCreds = ghUtils.botAuthCreds;
 var github = require('../../config/github');
 var config = require('../../config/config');
 var webhookPushHandler = require('./webhookPushHandler');
@@ -42,7 +41,8 @@ module.exports.addRepo = function (req, res, next) {
 
 module.exports.removeComments = function (req, res, next) {
   var user = req.user;
-  if (req.query.removeComments) {
+  if (req.body.removeComments) {
+    console.log('ASDF REMOVNG COMMENTS YO');
     ghUtils.closeAllCreatedTodos(user.profile.username, req.params.repo, next);
   } else {
     next();
@@ -53,13 +53,20 @@ module.exports.removeWebhook = function (req, res, next) {
   var user = req.user;
   var webHookId = _.find(user.repos, function (repoObject) {
     return repoObject.name === req.params.repo;
-  }, 'hookId');
+  }).hookId;
   var hookDeleteData = {
     user: user.profile.username,
     repo: req.params.repo,
     id: webHookId
   };
-  github(botAuthCreds()).repos.deleteHook(hookDeleteData, next);
+  github(authCreds(user)).repos.deleteHook(hookDeleteData, next);
+};
+
+module.exports.removeFromUserRepos = function (req, res, next) {
+  req.user.repos = _.reject(req.user.repos, function (repoObject) {
+    return repoObject.name === req.params.repo;
+  });
+  req.user.save(next);
 };
 
 module.exports.removeBot = function (req, res, next) {
@@ -69,13 +76,7 @@ module.exports.removeBot = function (req, res, next) {
     repo: req.params.repo,
     collabuser: config.BOT_USERNAME
   };
-  github(authCreds(user)).repos.removeCollaborator(collaboratorData, function (err) {
-    if (err) {
-      next(err);
-    } else {
-      res.send({success: true});
-    }
-  });
+  github(authCreds(user)).repos.removeCollaborator(collaboratorData, next);
 };
 
 module.exports.webhookAll = function (req, res, next) {
