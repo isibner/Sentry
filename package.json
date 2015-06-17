@@ -20,7 +20,7 @@
     "express-handlebars": "^1.1.0",
     "express-session": "^1.9.3",
     "express-validator": "^2.8.0",
-    "github": "^0.2.3",
+    "github": "^0.2.4",
     "istextorbinary": "^1.0.2",
     "lodash": "^3.4.0",
     "mongoose": "^3.8.21",
