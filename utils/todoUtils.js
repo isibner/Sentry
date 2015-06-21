@@ -1,22 +1,22 @@
 var defaultRegexes = {
-  todoRegex: /^[\+|\-]?[\s]*[\W]*[\s]*TODO:[\W|\s]*/i,
-  labelRegex: /^\+?[\s]*[\W]*[\s]*TODO-LABELS:[\W|\s]*/i,
-  bodyRegex: /^\+?[\s]*[\W]*[\s]*TODO-BODY:[\W|\s]*/i,
+  todoRegex: /^[\+|\-]?[\s]*[\W]*[\s]*TODO[\W|\s]*/i,
+  labelRegex: /^\+?[\s]*[\W]*[\s]*LABELS:[\W|\s]*/i,
+  bodyRegex: /^\+?[\s]*[\W]*[\s]*BODY:[\W|\s]*/i,
   extensions: []
 };
 
 var fileRegexes = [
   {
-    todoRegex: /^[\+|\-]?[\s]*[\/\/]*[\s]*TODO:[\W|\s]*/i,
-    labelRegex: /^\+?[\s]*[\/\/]*[\s]*TODO-LABELS:[\W|\s]*/i,
-    bodyRegex: /^\+?[\s]*[\/\/]*[\s]*TODO-BODY:[\W|\s]*/i,
-    extensions: ['.js', '.c', '.cpp', '.java']
+    todoRegex: /^[\+|\-]?[\s]*[\/\/|\*]*[\s]*TODO[\W|\s]*/i,
+    labelRegex: /^\+?[\s]*[\/\/|\*]*[\s]*LABELS:[\s]*/i,
+    bodyRegex: /^\+?[\s]*[\/\/|\*]*[\s]*/i,
+    extensions: [ '.c', '.cpp', '.java', '.js', '.less', '.m', '.sass', '.scala', '.scss', '.swift']
   },
   {
-    todoRegex: /^[\+|\-]?[\s]*[#]*[\s]*TODO:[\W|\s]*/i,
-    labelRegex: /^\+?[\s]*[#]*[\s]*TODO-LABELS:[\W|\s]*/i,
-    bodyRegex: /^\+?[\s]*[#]*[\s]*TODO-BODY:[\W|\s]*/i,
-    extensions: ['.py', '.bash', '.sh']
+    todoRegex: /^[\+|\-]?[\s]*[#]*[\s]*TODO[\W|\s]*/i,
+    labelRegex: /^\+?[\s]*[#]*[\s]*LABELS:[\W|\s]*/i,
+    bodyRegex: /^\+?[\s]*[#]*[\W|\s]*/i,
+    extensions: ['.bash', '.coffee', '.pl', '.py', '.rb', '.sh', '.zsh']
   }
 ];
 
