@@ -40,28 +40,6 @@ var createIssueWorker = function (user, repo) {
   };
 };
 
-var parseTodos = function (files, repo) {
-  var result = [];
-  files.forEach(function (file) {
-    for (var lineNum = 0; lineNum < file.lines.length; lineNum++) {
-      var line = file.lines[lineNum];
-      if (todoUtils.isTodo(line, file.path)) {
-        result.push({
-          title: todoUtils.getTodoTitle(line, file.path),
-          lineNum: lineNum + 1,
-          path: file.path,
-          repo: repo
-        });
-      } else if (todoUtils.isTodoLabel(line, file.path)) {
-        result[result.length - 1].labels = todoUtils.getTodoLabels(line, file.path);
-      } else if (todoUtils.isTodoBody(line, file.path)) {
-        result[result.length - 1].body = todoUtils.getTodoBody(line, file.path);
-      }
-    }
-  });
-  return result;
-};
-
 module.exports = function (req, res) {
   var tempFolderPath = temp.mkdirSync('todobot');
   var gitURL = 'https://' + config.BOT_USERNAME + ':' + config.BOT_PASSWORD + '@github.com/' + req.user.profile.username + '/' + req.params.repo + '.git';
@@ -81,7 +59,7 @@ module.exports = function (req, res) {
       .map(function (filePath) {
         return {path: filePath, lines: fs.readFileSync(filePath, 'utf8').split('\n')};
       });
-    var todos = parseTodos(files, req.params.repo);
+    var todos = todoUtils.parseTodos(files, req.params.repo);
     var issueQueue = async.queue(createIssueWorker(req.user, req.params.repo), ISSUE_QUEUE_SIZE);
     var blameQueue = async.queue(gitBlameWorker(tempFolderPath, issueQueue), BLAME_QUEUE_SIZE);
 

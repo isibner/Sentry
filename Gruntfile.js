@@ -6,9 +6,17 @@ module.exports = function (grunt) {
       options: {
         rulePaths: ['.eslint_rules']
       },
-      target: ['*.js', 'config/**/*.js', 'utils/*', 'app/**/*.js']
+      target: ['*.js', 'config/**/*.js', 'utils/*', 'app/**/*.js', 'test/**/*.js']
+    },
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/*Spec.js']
+      }
     }
   });
 
-  grunt.registerTask('default', ['eslint']);
+  grunt.registerTask('default', ['eslint', 'mochaTest']);
 };
