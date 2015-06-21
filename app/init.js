@@ -57,7 +57,7 @@ module.exports = function (app) {
   passport.use(new GitHubStrategy({
       clientID: config.GITHUB_CLIENT_ID,
       clientSecret: config.GITHUB_CLIENT_SECRET,
-      callbackURL: 'https://pennapps-todo.herokuapp.com/auth/github/callback'
+      callbackURL: config.CALLBACK_URL
     },
     function (accessToken, refreshToken, profile, done) {
       User.findOrCreate({

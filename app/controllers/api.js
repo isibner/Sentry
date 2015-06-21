@@ -23,7 +23,7 @@ module.exports.addRepo = function (req, res, next) {
       events: ['push'],
       active: true,
       config: {
-        url: 'https://pennapps-todo.herokuapp.com/api/webhook/all',
+        url: config.WEBHOOK_URL,
         content_type: 'json',
         insecure_ssl: 1
       }
