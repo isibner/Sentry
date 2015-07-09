@@ -22,6 +22,10 @@ var fileRegexes = [
   }
 ];
 
+var trim = function (str) {
+  return str.trim();
+};
+
 var getExtension = module.exports.getExtension = function (filename) {
   return filename.lastIndexOf('.') >= 0 ? filename.substring(filename.lastIndexOf('.')) : null;
 };
@@ -53,9 +57,6 @@ var isTodoLabel = module.exports.isTodoLabel = function (line, filename) {
 
 var getTodoLabels = module.exports.getTodoLabels = function (line, filename) {
   var regexes = regexesForFilename(filename);
-  var trim = function (str) {
-    return str.trim();
-  };
   var rawLabels = line.split(regexes.labelRegex)[1].split(',');
   return _(rawLabels).map(trim).uniq().value();
 };
@@ -70,40 +71,65 @@ var getTodoBody = module.exports.getTodoBody = function (line, filename) {
   return line.split(regexes.bodyRegex)[1];
 };
 
-// files -- [{path: String, lines: [String]}]
-// repo  -- String
-// returns -- [{title: String, labels: [String], lineNum: String, path: String, repo: String, body: String | null}]
+var Todo = module.exports.Todo = function (options) {
+  this.lines = options.lines || [];
+  this.repo = options.repo;
+  this.path = options.path;
+  this.lineNum = options.lineNum;
+};
+
+Todo.prototype.title = function () {
+  return _(this.lines)
+    .filter((_.partial(isTodo, _, this.path)))
+    .map(_.partial(getTodoTitle, _, this.path))
+    .map(trim)
+    .value()
+    .join(' ');
+};
+
+Todo.prototype.labels = function () {
+  return _(this.lines)
+    .filter(_.partial(isTodoLabel, _, this.path))
+    .map(_.partial(getTodoLabels, _, this.path))
+    .flatten()
+    .value();
+};
+
+Todo.prototype.body = function () {
+  return _(this.lines)
+    .filter(_.partial(isTodoBody, _, this.path))
+    .filter(_.negate(_.partial(isTodoLabel, _, this.path)))
+    .filter(_.negate(_.partial(isTodo, _, this.path)))
+    .map(_.partial(getTodoBody, _, this.path))
+    .map(trim)
+    .value()
+    .join(' ');
+};
+
+// files   -- [{path: String, lines: [String]}]
+// repo    -- String
+// returns -- [{title: -> String, labels: -> [String], body: -> String | null, lineNum: Number, path: String, repo: String, lines: [String]}]
 module.exports.parseTodos = function (files, repo) {
   var result = [];
   files.forEach(function (file) {
-    var currentTodo = null;
+    var parsingTodo = false;
     for (var lineNum = 0; lineNum < file.lines.length; lineNum++) {
       var line = file.lines[lineNum];
       if (isTodo(line, file.path)) {
-        currentTodo = {
-          title: getTodoTitle(line, file.path),
+        parsingTodo = true;
+        var todo = new Todo({
           lineNum: lineNum + 1,
           path: file.path,
           repo: repo,
-          labels: []
-        };
-        result.push(currentTodo);
-      } else if (currentTodo && isTodoLabel(line, file.path)) {
-        currentTodo.labels = getTodoLabels(line, file.path);
-      } else if (currentTodo && isTodoBody(line, file.path)) {
-        currentTodo.body = currentTodo.body || [];
-        currentTodo.body.push(getTodoBody(line, file.path));
+          lines: [line]
+        });
+        result.push(todo);
+      } else if (parsingTodo && (isTodoLabel(line, file.path) || isTodoBody(line, file.path))) {
+        result[result.length - 1].lines.push(line);
       } else {
-        currentTodo = null;
+        parsingTodo = false;
       }
     }
   });
-  return result.map(function (todo) {
-    // Combine all the body lines into a single string
-    var trim = function (str) {
-      return str.trim();
-    };
-    todo.body = todo.body ? todo.body.map(trim).join(' ') : null;
-    return todo;
-  });
+  return result;
 };

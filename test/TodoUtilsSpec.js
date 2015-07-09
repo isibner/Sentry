@@ -2,6 +2,7 @@ var assert    = require('chai').assert;
 var fs        = require('fs');
 var path      = require('path');
 var todoUtils = require('../utils/todoUtils');
+var Todo      = todoUtils.Todo;
 
 var fixturesDir = path.join(__dirname, 'fixtures');
 
@@ -193,6 +194,33 @@ describe('TodoUtils', function () {
     });
   });
 
+  describe('Todo class', function () {
+    it('should copy fields correctly upon construction', function () {
+      var opts = {
+        lines: ['foo', 'bar'],
+        repo: 'repo',
+        path: 'path',
+        lineNum: 1
+      };
+      var todo = new Todo(opts);
+      assert.deepEqual(opts.lines, todo.lines);
+      assert.strictEqual(opts.repo, todo.repo);
+      assert.strictEqual(opts.path, todo.path);
+      assert.strictEqual(opts.lineNum, todo.lineNum);
+    });
+
+    it('should derive the title from the lines', function () {
+      var opts = {
+        lines: [DOUBLE_SLASH_TODO_LINE, DOUBLE_SLASH_LABEL_LINE, DOUBLE_SLASH_BODY_LINE],
+        repo: 'repo',
+        path: 'path.less',
+        lineNum: 1
+      };
+      var todo = new Todo(opts);
+      assert.strictEqual(EXPECTED_TODO_TITLE, todo.title());
+    });
+  });
+
   describe('#parseTodos', function () {
     it("shouldn't choke on an empty array", function () {
       assert.deepEqual(todoUtils.parseTodos([]), []);
@@ -201,96 +229,88 @@ describe('TodoUtils', function () {
     it('should handle a (mock) JavaScript file with one body line', function () {
       var repo = 'repo';
       var mockJSFile = {path: 'foo.js', lines: [DOUBLE_SLASH_TODO_LINE, DOUBLE_SLASH_LABEL_LINE, DOUBLE_SLASH_BODY_LINE]};
-      var expectedOutput = [{
-        title: EXPECTED_TODO_TITLE,
-        labels: ['doubleslash'].concat(EXPECTED_COMMON_LABELS),
-        body: EXPECTED_BODY,
-        path: 'foo.js',
-        lineNum: 1,
-        repo: repo
-      }];
-      assert.deepEqual(todoUtils.parseTodos([mockJSFile], repo), expectedOutput);
+      var todo = todoUtils.parseTodos([mockJSFile], repo)[0];
+      assert.strictEqual(EXPECTED_TODO_TITLE, todo.title());
+      assert.deepEqual(['doubleslash'].concat(EXPECTED_COMMON_LABELS), todo.labels());
+      assert.strictEqual(EXPECTED_BODY, todo.body());
+      assert.strictEqual(1, todo.lineNum);
+      assert.strictEqual('foo.js', todo.path);
+      assert.strictEqual(repo, todo.repo);
     });
 
     it('should handle a (mock) JavaScript file with multiple body lines', function () {
       var repo = 'repo';
       var bodyLines = ['// This is the first line.', '// This is another', '//   separated by a newline.'];
       var mockJSFile = {path: 'foo.js', lines: [DOUBLE_SLASH_TODO_LINE, DOUBLE_SLASH_LABEL_LINE].concat(bodyLines)};
-      var expectedOutput = [{
-        title: EXPECTED_TODO_TITLE,
-        labels: ['doubleslash'].concat(EXPECTED_COMMON_LABELS),
-        body: 'This is the first line. This is another separated by a newline.',
-        path: 'foo.js',
-        lineNum: 1,
-        repo: repo
-      }];
-      assert.deepEqual(todoUtils.parseTodos([mockJSFile], repo), expectedOutput);
+      var todo = todoUtils.parseTodos([mockJSFile], repo)[0];
+      assert.strictEqual(EXPECTED_TODO_TITLE, todo.title());
+      assert.deepEqual(['doubleslash'].concat(EXPECTED_COMMON_LABELS), todo.labels());
+      assert.strictEqual('This is the first line. This is another separated by a newline.', todo.body());
+      assert.strictEqual(1, todo.lineNum);
+      assert.strictEqual('foo.js', todo.path);
+      assert.strictEqual(repo, todo.repo);
     });
 
     it('should handle the Java file in fixtures/BlockComments.java', function () {
       var repo = 'repo';
       var filepath = path.join(fixturesDir, 'BlockComments.java');
       var testFile = {path: filepath, lines: fs.readFileSync(filepath, 'utf8').split('\n')};
-      var expectedOutput = [{
-        title: 'abc123',
-        labels: ['abc', '123', 'test'],
-        body: 'body1 body2 bodybodybody',
-        path: filepath,
-        lineNum: 3,
-        repo: repo
-      }];
-      assert.deepEqual(todoUtils.parseTodos([testFile], repo), expectedOutput);
+      var todo = todoUtils.parseTodos([testFile], repo)[0];
+
+      assert.strictEqual('abc123', todo.title());
+      assert.deepEqual(['abc', '123', 'test'], todo.labels());
+      assert.strictEqual('body1 body2 bodybodybody', todo.body());
+      assert.strictEqual(3, todo.lineNum);
+      assert.strictEqual(filepath, todo.path);
+      assert.strictEqual(repo, todo.repo);
     });
 
     it('should handle the Python file in fixtures/MultipleComments.py', function () {
       var repo = 'repo';
       var filepath = path.join(fixturesDir, 'MultipleComments.py');
       var testFile = {path: filepath, lines: fs.readFileSync(filepath, 'utf8').split('\n')};
-      var expectedOutput = [{
-        title: 'comment1',
-        labels: [],
-        body: 'I am comment 1',
-        path: filepath,
-        lineNum: 1,
-        repo: repo
-      }, {
-        title: 'comment2',
-        labels: ['python'],
-        body: 'I am comment 2. I have two lines.',
-        path: filepath,
-        lineNum: 8,
-        repo: repo
-      }];
-      assert.deepEqual(todoUtils.parseTodos([testFile], repo), expectedOutput);
+      var todos = todoUtils.parseTodos([testFile], repo);
+      assert.strictEqual('comment1', todos[0].title());
+      assert.deepEqual([], todos[0].labels());
+      assert.strictEqual('I am comment 1', todos[0].body());
+      assert.strictEqual(1, todos[0].lineNum);
+      assert.strictEqual(filepath, todos[0].path);
+      assert.strictEqual(repo, todos[0].repo);
+
+      assert.strictEqual('comment2', todos[1].title());
+      assert.deepEqual(['python'], todos[1].labels());
+      assert.strictEqual('I am comment 2. I have two lines.', todos[1].body());
+      assert.strictEqual(8, todos[1].lineNum);
+      assert.strictEqual(filepath, todos[1].path);
+      assert.strictEqual(repo, todos[1].repo);
     });
 
     it('should handle the Less file in fixtures/mixed-comments.less', function () {
       var repo = 'repo';
       var filepath = path.join(fixturesDir, 'mixed-comments.less');
       var testFile = {path: filepath, lines: fs.readFileSync(filepath, 'utf8').split('\n')};
-      var expectedOutput = [{
-        title: 'Add some todo stuff',
-        labels: ['block'],
-        body: 'We really need some content for these tests.',
-        path: filepath,
-        lineNum: 4,
-        repo: repo
-      }, {
-        title: 'Add some inline comments too.',
-        labels: ['inline'],
-        body: 'The // club needs some love too!',
-        path: filepath,
-        lineNum: 12,
-        repo: repo
-      }, {
-        title: 'Write the tests for this fixture',
-        labels: ['block'],
-        body: 'We really need some tests for this content.',
-        path: filepath,
-        lineNum: 16,
-        repo: repo
-      }];
-      assert.deepEqual(todoUtils.parseTodos([testFile], repo), expectedOutput);
+      var todos = todoUtils.parseTodos([testFile], repo);
+
+      assert.strictEqual('Add some todo stuff', todos[0].title());
+      assert.deepEqual(['block'], todos[0].labels());
+      assert.strictEqual('We really need some content for these tests.', todos[0].body());
+      assert.strictEqual(4, todos[0].lineNum);
+      assert.strictEqual(filepath, todos[0].path);
+      assert.strictEqual(repo, todos[0].repo);
+
+      assert.strictEqual('Add some inline comments too.', todos[1].title());
+      assert.deepEqual(['inline'], todos[1].labels());
+      assert.strictEqual('The // club needs some love too!', todos[1].body());
+      assert.strictEqual(12, todos[1].lineNum);
+      assert.strictEqual(filepath, todos[1].path);
+      assert.strictEqual(repo, todos[1].repo);
+
+      assert.strictEqual('Write the tests for this fixture', todos[2].title());
+      assert.deepEqual(['block'], todos[2].labels());
+      assert.strictEqual('We really need some tests for this content.', todos[2].body());
+      assert.strictEqual(16, todos[2].lineNum);
+      assert.strictEqual(filepath, todos[2].path);
+      assert.strictEqual(repo, todos[2].repo);
     });
   });
 });
