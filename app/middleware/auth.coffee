@@ -7,8 +7,8 @@ module.exports = (dependencies) ->
     #   scope: 'repo, admin:repo_hook'
     # }
     # githubCallbackResolution: (req, res) -> res.redirect('/')
-    ensureAuthenticated: (req, res) ->
-      return next if req.isAuthenticated()
+    ensureAuthenticated: (req, res, next) ->
+      return next() if req.isAuthenticated()
       res.redirect('/login')
     noop: ->
   }

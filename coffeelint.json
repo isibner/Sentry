@@ -23,7 +23,7 @@
         "level": "error"
     },
     "empty_constructor_needs_parens": {
-        "level": "ignore"
+        "level": "error"
     },
     "indentation": {
         "value": 2,
@@ -39,11 +39,11 @@
         "limitComments": true
     },
     "missing_fat_arrows": {
-        "level": "ignore"
+        "level": "error"
     },
     "newlines_after_classes": {
         "value": 3,
-        "level": "ignore"
+        "level": "error"
     },
     "no_backticks": {
         "level": "error"

@@ -5,7 +5,6 @@ module.exports = (dependencies) ->
     ROOT: root
     APP_ROOT: path.join(root, 'app')
     COOKIE_SECRET: process.env.COOKIE_SECRET || '12345'
-    WEBHOOK_URL: 'https://todobot.herokuapp.com/api/webhook/all'
-    CALLBACK_URL: 'https://todobot.herokuapp.com/auth/github/callback'
+    BASE_URL: process.env.BASE_URL || 'http://localhost:3000/'
     MONGO_URI: process.env.MONGOLAB_URI || 'mongodb://localhost/todo-app'
   }

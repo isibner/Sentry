@@ -10,17 +10,11 @@ class ExampleSourceProvider extends require('events').EventEmitter
   # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
   @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
 
-  # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/{@NAME}'.
+  # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
   # This endpoint *must* be registered in initializeAuthEndpoints().
   # May be null if this service provider expects to be manually configured; in this case,
   # isAuthenticated() should always return true.
   @INITIAL_AUTH_ENDPOINT = '/example-service/auth'
-
-  # The webhook endpoint that this plugin will register with its source, relative to '/plugins/{@NAME}'.
-  # This endpoint should be added to activated repos as a webhook URL.
-  # May be null, if this source provider for some reason does not support webhooks.
-  # NB: TodoBot will not fall back to polling for changes. Let your git platform know that you want webhooks!
-  @WEBHOOK_ENDPOINT = '/example-service/handle-webhook'
 
   # Construct a new ExampleSourceProvider.
   # @param {Object} options The options hash for this object
@@ -31,10 +25,10 @@ class ExampleSourceProvider extends require('events').EventEmitter
   #   which is very useful for configuring auth strategies.
   constructor: ({@config, @packages}) ->
 
-  # Initialize the required auth endpoints for this source provider, mounted at /plugins/{@NAME}.
+  # Initialize the required auth endpoints for this source provider, mounted at /plugins/source-providers/{@NAME}.
   # NB: It's recommended that you save any necessary access tokens on req.user, so you
   # can easily access it later.
-  # @param {Object} router The express router which will be mounted at /plugins/{@NAME}
+  # @param {Object} router The express router which will be mounted at /plugins/source-providers/{@NAME}
   initializeAuthEndpoints: (router) ->
 
   # Is the given request authenticated for this source provider?
@@ -66,16 +60,14 @@ class ExampleSourceProvider extends require('events').EventEmitter
   # @return {String} The clone URL for this repo.
   cloneURL: (user, repoId) ->
 
-
   # Initialize hooks that signal a change in source data for an activated repo.
   # This will most often be a webhook endpoint; you can register your hook handler on the router
-  # object, relative to '/plugins/{@NAME}'. Alternatively, it could be on a cron job or something.
+  # object, relative to '/plugins/source-providers/{@NAME}'. Alternatively, it could be on a cron job or something.
   # The only requirement is that you must trigger the 'hook' event with the data for the hook.
   # It's up to you to define that data in a way that makes sense for your source, but it's a good
   # idea to pass the ID of the target repository in most cases.
-  # @param {Object} router The express router which will be mounted at /plugins/{@NAME}
+  # @param {Object} router The express router which will be mounted at /plugins/source-providers/{@NAME}
   initializeHooks: (router) ->
-
 
   # Undo activateRepo for this repository. Only called if the requesting user is authenticated.
   # @param {Object} user The Mongoose model for the user

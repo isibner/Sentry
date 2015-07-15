@@ -5,16 +5,15 @@ module.exports = (dependencies) ->
   } = dependencies
   {server: {ROOT, APP_ROOT, COOKIE_SECRET, CALLBACK_URL}, github: {CLIENT_ID, CLIENT_SECRET}, plugins} = config
   {lodash: _, 'body-parser': bodyParser, 'cookie-parser': cookieParser, 'express-session': session, 'connect-flash': flash
-   , 'express-handlebars': exphbs, 'express-validator': expressValidator, 'passport-github': passportGithub
+   , 'express-handlebars': exphbs, 'express-validator': expressValidator, 'passport-local': passportLocal, 'serve-favicon': favicon
    , glob, passport, express, path, handlebars} = packages
-  # GitHubStrategy = passportGithub.Strategy
   User = db.model('User')
   return (app) ->
     # Initialize all plugins and sourceProviders
     initPlugins = {}
     {sourceProviders, services} = plugins
     initPlugins.sourceProviders = _.map sourceProviders, (Provider) -> new Provider({config, packages})
-    initPlugins.services = _.map services, (Service) -> new Service({config, db, packages})
+    initPlugins.services = _.map services, (Service) -> new Service({config, db, packages, sourceProviders: initPlugins.sourceProviders})
 
     app.disable 'x-powered-by'
     app.set 'views', path.join(APP_ROOT, 'views')
@@ -32,6 +31,7 @@ module.exports = (dependencies) ->
     )
     app.set 'view engine', '.hbs'
     app.set 'port', process.env.PORT || 3000
+    app.use favicon(path.join ROOT, '/public/favicons/favicon.ico')
     app.use bodyParser.urlencoded({extended: false})
     app.use bodyParser.json()
     app.use expressValidator()
@@ -52,30 +52,23 @@ module.exports = (dependencies) ->
     app.use passport.initialize()
     app.use passport.session()
 
-    # githubStrat = new GitHubStrategy(
-    #   {
-    #     clientID: CLIENT_ID,
-    #     clientSecret: CLIENT_SECRET,
-    #     callbackURL: CALLBACK_URL
-    #   },
-    #   ((accessToken, refreshToken, profile, done) ->
-    #     User.findOrCreate(
-    #       {'profile.id': profile.id},
-    #       {profile, accessToken, refreshToken},
-    #       (err, user) ->
-    #         return done(err) if err
-    #         user.profile = profile
-    #         user.accessToken = accessToken
-    #         user.refreshToken = refreshToken
-    #         user.save(done)
-    #     )
-    #   )
-    # )
+    localStrategy = new passportLocal.Strategy (username, password, done) ->
+      User.findOne {username}, (err, user) ->
+        return done(err) if err
+        console.log user
+        return done(null, false) if not user? or not user.verifyPassword(password)
+        done(null, user)
+
+    passport.use localStrategy
 
     passport.serializeUser (user, done) -> done(null, user._id)
     passport.deserializeUser (_id, done) -> User.findOne({_id}).exec(done)
 
     app.use '/static', express.static(path.join ROOT, '/public')
+
+    app.use (req, res, next) ->
+      res.locals.user = req.user
+      next()
 
     _.forEach controllers, (controller) ->
       controller({app, initPlugins})
@@ -86,6 +79,7 @@ module.exports = (dependencies) ->
       next(err)
 
     app.use (err, req, res, next) ->
+      console.error("Error processing #{req.originalUrl}")
       console.error(err)
       err.status ?= 500
       err.stack = if app.get('env') is 'development' then err.stack else ''
