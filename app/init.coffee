@@ -6,7 +6,7 @@ module.exports = (dependencies) ->
   {server: {ROOT, APP_ROOT, COOKIE_SECRET, CALLBACK_URL}, github: {CLIENT_ID, CLIENT_SECRET}, plugins} = config
   {lodash: _, 'body-parser': bodyParser, 'cookie-parser': cookieParser, 'express-session': session, 'connect-flash': flash
    , 'express-handlebars': exphbs, 'express-validator': expressValidator, 'passport-local': passportLocal, 'serve-favicon': favicon
-   , glob, passport, express, path, handlebars} = packages
+   , glob, passport, express, path, handlebars, morgan, url, async} = packages
   User = db.model('User')
   return (app) ->
     # Initialize all plugins and sourceProviders
@@ -47,6 +47,7 @@ module.exports = (dependencies) ->
     app.use (req, res, next) ->
       res.locals.successFlashes = req.flash 'success'
       res.locals.errorFlashes = req.flash 'error'
+      res.locals.hasFlashes = (res.locals.successFlashes.length > 0) or (res.locals.errorFlashes.length > 0)
       next()
 
     app.use passport.initialize()
@@ -55,7 +56,6 @@ module.exports = (dependencies) ->
     localStrategy = new passportLocal.Strategy (username, password, done) ->
       User.findOne {username}, (err, user) ->
         return done(err) if err
-        console.log user
         return done(null, false) if not user? or not user.verifyPassword(password)
         done(null, user)
 
@@ -65,10 +65,33 @@ module.exports = (dependencies) ->
     passport.deserializeUser (_id, done) -> User.findOne({_id}).exec(done)
 
     app.use '/static', express.static(path.join ROOT, '/public')
+    app.use morgan('dev')
 
     app.use (req, res, next) ->
       res.locals.user = req.user
       next()
+
+    # Peg source provider data to request
+    app.use (req, res, next) ->
+      async.map initPlugins.sourceProviders, ((sourceProvider, callback) ->
+        data =
+          name: sourceProvider.NAME
+          displayName: sourceProvider.DISPLAY_NAME
+          isAuthenticated: sourceProvider.isAuthenticated(req)
+          authEndpoint: "/plugins/source-providers/#{sourceProvider.NAME}/" + _.trimLeft(sourceProvider.AUTH_ENDPOINT, '/')
+          iconURL: "/plugins/source-providers/#{sourceProvider.NAME}/icon"
+        if not data.isAuthenticated
+          callback(null, data)
+        else
+          sourceProvider.getRepositoryListForUser req.user, (err, list) ->
+            return callback(err) if err
+            data.repoList = list
+            callback(null, data)
+      ), (mapError, mapData) ->
+        return next(mapError) if mapError
+        res.locals.sourceProviderData = mapData
+        console.log mapData
+        next()
 
     _.forEach controllers, (controller) ->
       controller({app, initPlugins})

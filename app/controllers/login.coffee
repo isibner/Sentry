@@ -6,7 +6,7 @@ module.exports = (dependencies) ->
     authenticationMiddleware = passport.authenticate 'local', {
       successRedirect: '/dashboard',
       failureRedirect: '/login',
-      failureFlash: true
+      failureFlash: 'Invalid credentials'
     }
 
     router.post '/', authenticationMiddleware

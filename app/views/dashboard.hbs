@@ -1,5 +1,21 @@
 <div class="container">
   <div class="row">
-    <h1>Welcome {{user.username}}</h1>
+    <h1>Welcome {{user.username}}.</h1>
+    <h2>Sources:</h2>
+    <hr>
+  </div>
+  <div class="row">
+    {{#each sourceProviderData}}
+      <h3>{{displayName}}</h3>
+      {{#if isAuthenticated}}
+        {{#each repoList}}
+          <p>{{name}}, {{id}}</p>
+        {{/each}}
+      {{else}}
+        <a href="{{authEndpoint}}" class="btn btn-lg btn-social btn-github">
+          <img class="repo-icon" src="{{iconURL}}">Authenticate
+        </a>
+      {{/if}}
+    {{/each}}
   </div>
 </div>

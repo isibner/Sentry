@@ -8,7 +8,7 @@ removeExtension = (filePath) ->
 
 dependencies = {}
 # Packages are the base; they obviously must stand alone
-builtins = ['fs', 'path']
+builtins = ['fs', 'path', 'url']
 fromPackageJson = Object.keys (require './package.json').dependencies
 dependencies.packages =
   _.chain(builtins.concat fromPackageJson)

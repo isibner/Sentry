@@ -30,9 +30,9 @@
   <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600|Lato:300,400,900' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="/static/css/normalize.css">
-  <link rel="stylesheet" href="/static/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/bootstrap-social.css">
-  <link rel="stylesheet" href="/static/css/font-awesome.css">
+  <link rel="stylesheet" href="/static/css/font-awesome.min.css">
 
   <!-- Theme CSS -->
   <link rel="stylesheet" href="/static/css/theme.css">
@@ -67,6 +67,14 @@
       color: white;
     }
 
+    .btn-get-started {
+      color: #fff;
+      background-color: #444;
+      border-color: rgba(0,0,0,0.2);
+      font-size: 1.6em;
+      padding: 10px 1em;
+    }
+
     #headerwrap .header-btn {
       text-align: center;
       margin-top: 40px;
@@ -85,7 +93,7 @@
     }
 
     .content div.container:nth-of-type(1)  {
-      padding-top: 100px;
+      padding-top: 70px;
     }
 
   </style>
@@ -105,12 +113,22 @@
   <script src="/static/js/sweet-alert.min.js"></script>
 
   <div class="content">
+    {{#if hasFlashes}}
+      <div id="alerts" class="container">
+      {{#each errorFlashes}}
+        <div class="alert alert-danger alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+      {{/each}}
+      {{#each successFlashes}}
+        <div class="alert alert-success alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+      {{/each}}
+      </div>
+    {{/if}}
     {{{body}}}
   </div>
 
   <div class="container">
     <hr>
-    <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> & <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a></p>
+    <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> &amp; <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a></p>
   </div>
 
 </body>
