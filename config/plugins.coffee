@@ -1,5 +1,9 @@
-plugins = ['todobot-github-todo']
+sourceProviders = [] # ['todobot-github-public']
+services = []# ['todobot-github-todo']
 
 module.exports = (dependencies) ->
-  {packages: {lodash: _}} = dependencies
-  return _.map plugins, (plugin) -> return (require plugin)
+  {packages: {lodash: _}, config} = dependencies
+  return {
+    sourceProviders: _.map sourceProviders, (provider) -> return (require provider)
+    services: _.map services, (plugin) -> return (require plugin)
+  }

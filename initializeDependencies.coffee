@@ -9,7 +9,7 @@ removeExtension = (filePath) ->
 dependencies = {}
 # Packages are the base; they obviously must stand alone
 builtins = ['fs', 'path']
-fromPackageJson = Object.keys (require 'package.json').dependencies
+fromPackageJson = Object.keys (require './package.json').dependencies
 dependencies.packages =
   _.chain(builtins.concat fromPackageJson)
   .map((packageName) -> [packageName, packageName])
@@ -39,7 +39,6 @@ unspecifiedFiles = _.difference glob.sync(path.join libDir, '**/*.coffee'), spec
 dependencies.lib = {}
 for file in (specifiedFiles.concat unspecifiedFiles)
   packageName = removeExtension(path.relative libDir, file)
-  console.log packageName
   dependencies.lib[packageName] = require(file)(dependencies)
 
 

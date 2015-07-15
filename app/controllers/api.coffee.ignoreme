@@ -30,6 +30,7 @@ module.exports = (dependencies) ->
           user.repos ?= []
           user.repos.push {name: repo, hookId: result.id}
           user.save(next)
+
     # TODO implement this later, not necessary for now
     removeComments = (req, res, next) ->
       next()
