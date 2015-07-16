@@ -1,29 +1,27 @@
-# Example source provider. It extends EventEm
+# Example service
 class ExampleSourceProvider extends require('events').EventEmitter
 
-  # The name of your source provider, in kebab-case.
-  @NAME = 'example-source-provider'
-
-  # The header that the user will see the repos from this source listed under.
-  @REPO_LIST_HEADER = 'Example Source'
-
-  # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
-  @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
-
-  # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
-  # This endpoint *must* be registered in initializeAuthEndpoints().
-  # May be null if this service provider expects to be manually configured; in this case,
-  # isAuthenticated() should always return true.
-  @INITIAL_AUTH_ENDPOINT = '/example-service/auth'
-
-  # Construct a new ExampleSourceProvider.
+    # Construct a new ExampleSourceProvider.
   # @param {Object} options The options hash for this object
   # @param options {Object} config The configuration object for this instance of TodoBot.
   #   This includes server config, plugins config, and any other config files you add.
   # @param {Object} packages The packages for the parent TodoBot instance, which should include those
-  #   specified as peerDependencies for this module. Also includes the parent instance of passport,
-  #   which is very useful for configuring auth strategies.
+  #   specified as peerDependencies for this module.
   constructor: ({@config, @packages}) ->
+    # The name of your source provider, in kebab-case.
+    @NAME = 'example-source-provider'
+
+    # The header that the user will see the repos from this source listed under.
+    @REPO_LIST_HEADER = 'Example Source'
+
+    # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
+    @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
+
+    # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
+    # This endpoint *must* be registered in initializeAuthEndpoints().
+    # May be null if this service provider expects to be manually configured; in this case,
+    # isAuthenticated() should always return true.
+    @INITIAL_AUTH_ENDPOINT = '/example-service/auth'
 
   # Initialize the required auth endpoints for this source provider, mounted at /plugins/source-providers/{@NAME}.
   # NB: It's recommended that you save any necessary access tokens on req.user, so you

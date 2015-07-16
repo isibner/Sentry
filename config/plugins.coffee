@@ -1,5 +1,5 @@
-sourceProviders = ['todobot-github-source'] # ['todobot-github-public']
-services = []# ['todobot-github-todo']
+sourceProviders = ['todobot-github-source']
+services = ['todobot-linecounting-service']
 
 module.exports = (dependencies) ->
   {packages: {lodash: _}, config} = dependencies

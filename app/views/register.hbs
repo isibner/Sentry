@@ -1,9 +1,21 @@
 <div class="container">
   <div class="row">
-    <form method="post" class="col-sm-8 col-sm-offset-2">
-      Email: <input type="text" name="username"><br>
-      Password: <input type="password" maxlength="18" name="password"><br>
-      <input type="submit" value="Register">
+  <div class="col-sm-8 col-sm-offset-2">
+    <form method="post" class="form-horizontal">
+      <h1>Register</h1>
+      <br>
+      <div class="form-group">
+        <label for="emailInput" class="col-sm-2 control-label">Email: </label><div class="col-sm-9"><input type="text" name="username" class="form-control" id="emailInput"></div>
+      </div>
+      <div class="form-group">
+        <label for="passwordInput" class="col-sm-2 control-label">Password: </label><div class="col-sm-9"><input type="password" maxlength="18" name="password" class="form-control" id="passwordInput"></div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <input class="btn btn-default" type="submit" value="Register">
+        </div>
+      </div>
     </form>
+  </div>
   </div>
 </div>

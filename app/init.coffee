@@ -1,6 +1,6 @@
 module.exports = (dependencies) ->
   {
-    lib: {db},
+    lib: {db, getActiveStatusForRepo, cloneAndHandleFiles},
     packages, config, controllers
   } = dependencies
   {server: {ROOT, APP_ROOT, COOKIE_SECRET, CALLBACK_URL}, github: {CLIENT_ID, CLIENT_SECRET}, plugins} = config
@@ -8,6 +8,7 @@ module.exports = (dependencies) ->
    , 'express-handlebars': exphbs, 'express-validator': expressValidator, 'passport-local': passportLocal, 'serve-favicon': favicon
    , glob, passport, express, path, handlebars, morgan, url, async} = packages
   User = db.model('User')
+  ActiveRepo = db.model('ActiveRepo')
   return (app) ->
     # Initialize all plugins and sourceProviders
     initPlugins = {}
@@ -25,10 +26,12 @@ module.exports = (dependencies) ->
       partialsDir: path.join(APP_ROOT, 'views', 'partials')
       helpers:
         toJSON: (obj) -> JSON.stringify(obj, null, '  ')
-        addOrRemove: -> if @todoBotActive then 'remove' else 'add'
-        isRemove: -> @todoBotActive
-        addOrRemoveCaps: -> if @todoBotActive then 'Remove' else 'Add'
+        addOrRemove: -> if this.todoBotActive then 'remove' else 'add'
+        isRemove: -> this.todoBotActive
+        addOrRemoveCaps: -> if this.todoBotActive then 'Remove' else 'Add'
     )
+    handlebars.registerHelper 'encodeUri', (uri) ->
+      return new handlebars.SafeString(encodeURIComponent uri)
     app.set 'view engine', '.hbs'
     app.set 'port', process.env.PORT || 3000
     app.use favicon(path.join ROOT, '/public/favicons/favicon.ico')
@@ -85,16 +88,43 @@ module.exports = (dependencies) ->
         else
           sourceProvider.getRepositoryListForUser req.user, (err, list) ->
             return callback(err) if err
-            data.repoList = list
-            callback(null, data)
+            async.map list, getActiveStatusForRepo(sourceProvider.NAME, req.user._id), (err, activeData) ->
+              return callback(err) if err
+              data.repoList = activeData
+              callback(null, data)
       ), (mapError, mapData) ->
         return next(mapError) if mapError
+        _.each mapData, (sourceProvider) ->
+          sourceProvider.repoList = _.sortByOrder sourceProvider.repoList, ['active'], ['desc']
+          _.each sourceProvider.repoList, (repoObject) ->
+            inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), repoObject.activeServices
+            activeServicesAsObjects = _.map repoObject.activeServices, (serviceName) ->
+              rawService = _.findWhere initPlugins.services, {NAME: serviceName}
+              return {NAME: rawService.NAME, DISPLAY_NAME: rawService.DISPLAY_NAME, isAuthenticated: rawService.isAuthenticated(req), AUTH_ENDPOINT: rawService.AUTH_ENDPOINT, active: true}
+            inactiveServicesAsObjects = _.map inactiveServices, (serviceName) ->
+              rawService = _.findWhere initPlugins.services, {NAME: serviceName}
+              return {NAME: rawService.NAME, DISPLAY_NAME: rawService.DISPLAY_NAME, isAuthenticated: rawService.isAuthenticated(req), AUTH_ENDPOINT: rawService.AUTH_ENDPOINT, active: false}
+            repoObject.services = activeServicesAsObjects.concat(inactiveServicesAsObjects)
         res.locals.sourceProviderData = mapData
-        console.log mapData
         next()
 
     _.forEach controllers, (controller) ->
       controller({app, initPlugins})
+
+    _.forEach initPlugins.sourceProviders, (sourceProvider) ->
+      sourceProvider.on 'hook', ({repoId}) ->
+        console.log 'hookin up'
+        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (err, docs) ->
+          return console.error(err, err.stack) if err
+          _.each docs, (activeRepo) ->
+            User.findById activeRepo.userId, (err, userModel) ->
+              #(cloneUrl, configObject, configKey
+              _.each activeRepo.activeServices, (serviceName) ->
+                service = _.findWhere initPlugins.services, {NAME: serviceName}
+                cloneAndHandleFiles sourceProvider.cloneUrl(userModel, activeRepo), activeRepo.configObject || {}, service.NAME, (err, files) ->
+                  service.handleHookRepoData activeRepo, files, (err) ->
+                    return console.error(err, err.stack) if err
+                    console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}, #{service.NAME}) successfully!"
 
     app.use (req, res, next) ->
       err = new Error('Not Found')

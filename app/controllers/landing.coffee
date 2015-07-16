@@ -2,7 +2,7 @@ module.exports = (dependencies) ->
   {packages: {lodash: _, express}, middleware: {auth}} = dependencies
   router = express.Router()
   return ({app}) ->
-    router.get '/', (req, res) -> res.render 'index'
+    router.get '/', (req, res) -> res.render 'index', {isIndex: true}
 
     router.get '/logout', (req, res) ->
       req.logout()

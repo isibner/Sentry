@@ -8,7 +8,7 @@ removeExtension = (filePath) ->
 
 dependencies = {}
 # Packages are the base; they obviously must stand alone
-builtins = ['fs', 'path', 'url']
+builtins = ['fs', 'path', 'url', 'child_process']
 fromPackageJson = Object.keys (require './package.json').dependencies
 dependencies.packages =
   _.chain(builtins.concat fromPackageJson)
@@ -29,6 +29,17 @@ dependencies.config =
   .mapKeys((value, fileName) -> removeExtension path.relative(configDir, fileName))
   .value()
 
+# Next models, which can depend on config and packages
+modelsDir = path.join __dirname, 'app/models/'
+modelPaths = glob.sync(path.join modelsDir, '*.coffee')
+dependencies.models =
+  _.chain(modelPaths)
+  .map((fileName) -> [fileName, fileName])
+  .zipObject()
+  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapKeys((value, fileName) -> _.capitalize(removeExtension(path.relative(modelsDir, fileName))))
+  .value()
+
 # Lib is tricky; lib files can depend on one another.
 # Toposort seems like overkill for this scale; so we'll use a magic JSON file instead.
 # We'll also load files that aren't specified after those that are (in undefined order).
@@ -40,19 +51,6 @@ dependencies.lib = {}
 for file in (specifiedFiles.concat unspecifiedFiles)
   packageName = removeExtension(path.relative libDir, file)
   dependencies.lib[packageName] = require(file)(dependencies)
-
-
-# Next models, which can depend on config, lib, and packages
-modelsDir = path.join __dirname, 'app/models/'
-modelPaths = glob.sync(path.join modelsDir, '*.coffee')
-dependencies.models =
-  _.chain(modelPaths)
-  .map((fileName) -> [fileName, fileName])
-  .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
-  .mapKeys((value, fileName) -> _.capitalize(removeExtension(path.relative(modelsDir, fileName))))
-  .value()
-
 
 # Next middleware, which shouldn't depend on one another
 middlewareDir = path.join __dirname, 'app/middleware/'

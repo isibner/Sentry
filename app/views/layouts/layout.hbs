@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>// TodoBot</title>
+  <title>Sentry</title>
   <!-- Favicon stuff -->
   <link rel="apple-touch-icon" sizes="57x57" href="/static/favicons/apple-icon-57x57.png">
   <link rel="apple-touch-icon" sizes="60x60" href="/static/favicons/apple-icon-60x60.png">
@@ -50,7 +50,6 @@
     #headerwrap {
       padding-top: 0;
       min-height: initial;
-      padding-bottom: 50px;
     }
 
     #headerwrap h1 {
@@ -65,6 +64,10 @@
     .btn-social i {
       margin: 0;
       color: white;
+    }
+
+    .navbar-default {
+      background-color: rgb(197, 16, 36);
     }
 
     .btn-get-started {
@@ -93,7 +96,49 @@
     }
 
     .content div.container:nth-of-type(1)  {
-      padding-top: 70px;
+      padding-top: 75px;
+    }
+
+    .configure-repo-form textarea {
+      width: 100%;
+      resize: false;
+      min-height: 300px;
+      font-family: monospace;
+    }
+
+    #alerts.alerts-index {
+      position: absolute;
+      margin-top: 5px;
+      left:0;
+      right:0;
+      margin-left:auto;
+      margin-right:auto;
+      z-index: 1;
+    }
+
+    .repoName {
+      margin-bottom: 20px;
+    }
+
+    .repoName .name {
+      font-family: Lato;
+      font-size: 1.3em;
+      font-weight: 500;
+    }
+
+    .repoName .label {
+      vertical-align: text-top;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .repoName .configure {
+      vertical-align: super;
+      font-weight: 400;
+    }
+
+    .repoName .configure:hover {
+      text-decoration: underline;
     }
 
   </style>
@@ -103,8 +148,17 @@
   <div class="navbar navbar-default navbar-fixed-top">
     <div class="container">
       <div class="navbar-header">
-        <a class="navbar-brand" href="/"><b>// TODOBOT</b></a>
+        <a class="navbar-brand" href="/"><b>// Sentry</b></a>
       </div>
+       <ul class="nav navbar-nav navbar-right">
+        <li>
+          {{#if user}}
+          <a class="navbar-brand" href="/logout"><b>Log out</b></a>
+          {{else}}
+          <a class="navbar-brand" href="/login"><b>Log in</b></a>
+          {{/if}}
+        </li>
+        </ul>
     </div>
   </div>
 
@@ -114,22 +168,30 @@
 
   <div class="content">
     {{#if hasFlashes}}
-      <div id="alerts" class="container">
+      <div id="alerts" class="container {{#if isIndex}}alerts-index{{/if}}">
+      <div class="row">
       {{#each errorFlashes}}
-        <div class="alert alert-danger alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+        <div class="col-sm-12 alert alert-danger alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
       {{/each}}
       {{#each successFlashes}}
-        <div class="alert alert-success alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+        <div class="col-sm-12 alert alert-success alert-dismissable">{{this}}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
       {{/each}}
+      </div>
       </div>
     {{/if}}
     {{{body}}}
   </div>
 
-  <div class="container">
+  <footer class="container">
     <hr>
-    <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> &amp; <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a></p>
-  </div>
+      <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> &amp; <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a>
+      <br>
+      {{#if isIndex}}
+        Image by <a href="http://www.markmurphycreative.co.uk/">Mark Murphy Creative</a>
+      {{/if}}
+    </p>
+    {{!-- <p class="centered"></p> --}}
+  </footer>
 
 </body>
 </html>
