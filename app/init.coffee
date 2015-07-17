@@ -121,8 +121,8 @@ module.exports = (dependencies) ->
               #(cloneUrl, configObject, configKey
               _.each activeRepo.activeServices, (serviceName) ->
                 service = _.findWhere initPlugins.services, {NAME: serviceName}
-                cloneAndHandleFiles sourceProvider.cloneUrl(userModel, activeRepo), activeRepo.configObject || {}, service.NAME, (err, files) ->
-                  service.handleHookRepoData activeRepo, files, (err) ->
+                cloneAndHandleFiles sourceProvider.cloneUrl(userModel, activeRepo), activeRepo.configObject || {}, service.NAME, (err, files, tempPath) ->
+                  service.handleHookRepoData activeRepo, {files, tempPath}, (err) ->
                     return console.error(err, err.stack) if err
                     console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}, #{service.NAME}) successfully!"
 

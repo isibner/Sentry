@@ -47,9 +47,9 @@ module.exports = (dependencies) ->
         #We've sent the message; now we can go and get the initial repo data asynchronously WRT the request.
         sourceProvider = _.findWhere initPlugins.sourceProviders, {NAME: req.params.sourceProviderName}
 
-        cloneAndHandleFiles sourceProvider.cloneUrl(req.user, activeRepo), activeRepo.configObject, service.NAME, (err, files) ->
+        cloneAndHandleFiles sourceProvider.cloneUrl(req.user, activeRepo), activeRepo.configObject, service.NAME, (err, files, tempPath) ->
           return console.error(err.message, err.code, err.stack) if err
-          service.handleInitialRepoData activeRepo, files, (err) ->
+          service.handleInitialRepoData activeRepo, {files, tempPath}, (err) ->
             return console.error(err.message, err.code, err.stack) if err
             console.log "Handled initial repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}, #{service.NAME}) successfully!"
 

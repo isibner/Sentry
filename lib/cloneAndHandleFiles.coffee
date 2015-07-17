@@ -3,5 +3,6 @@ module.exports = (dependencies) ->
   return (cloneUrl, configObject, configKey, callback) ->
     cloneIntoTemp cloneUrl, (err, tempPath) ->
       return callback(err) if err
-      getMatchingFiles tempPath, configObject, configKey, callback
+      getMatchingFiles tempPath, configObject, configKey, (err, files) ->
+        callback(err, files, tempPath)
 
