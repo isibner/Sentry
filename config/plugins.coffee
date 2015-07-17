@@ -1,4 +1,4 @@
-sourceProviders = ['todobot-github-source']
+sourceProviders = ['todobot-github-source', 'todobot-github-private-source']
 services = ['todobot-linecounting-service', 'sentry-cruft-service']
 
 module.exports = (dependencies) ->
