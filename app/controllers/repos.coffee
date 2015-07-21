@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
-  {packages: {express, lodash: _}, middleware: {auth}, lib: {db}} = dependencies
+  {packages: {express, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto, queueMap, repoQueueWorker}} = dependencies
   ActiveRepo = db.model('ActiveRepo')
   router = express.Router()
   return ({app, initPlugins}) ->
@@ -9,28 +9,43 @@ module.exports = (dependencies) ->
       res.send {error: msg}
 
     # TODO change to PUT for ajax goodness
-    router.get '/activate/:pluginName/:repoId', (req, res) ->
-      ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err, activeRepo) ->
+    router.get '/activate/:sourceProviderName/:repoId', (req, res) ->
+      {sourceProviderName, repoId} = req.params
+      userId = req.user._id
+
+      ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return sendErr(res, err.message) if err
         return sendErr(res, 'That repo is already active.') if activeRepo?
-        plugin = _.findWhere initPlugins.sourceProviders, {NAME: req.params.pluginName}
-        plugin.activateRepo req.user, req.params.repoId, (err) ->
+        sourceProvider = _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
+        sourceProvider.activateRepo req.user, repoId, (err) ->
           sendErr(res, err.message) if err
-          newActiveRepo = new ActiveRepo {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}
-          newActiveRepo.save (err) ->
-            sendErr(res, err.message) if err
-            res.send {success: 'Successfully activated repository.'}
+          newActiveRepo = new ActiveRepo {repoId, sourceProviderName, userId}
+          newActiveRepo.save (err, activeRepoWithId) ->
+            return sendErr(res, err.message) if err
+            repoPath = repoPathFor activeRepoWithId
+            cloneUrl = sourceProvider.cloneUrl(req.user, activeRepoWithId)
+            cloneInto {repoPath, cloneUrl}, (err) ->
+              return sendErr(res, err.message) if err
+              repoIdString = activeRepoWithId._id.toString()
+              queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
+              queueMap[repoIdString].push {repo: activeRepoWithId, initPlugins, isInitial: true}, (err) ->
+                return console.error(err, err.stack) if err
+                res.send {success: 'Successfully activated repository.'}
 
+    router.get '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->
+      {sourceProviderName, repoId} = req.params
+      userId = req.user._id
 
-    router.get '/deactivate/:pluginName/:repoId', (req, res, next) ->
-      ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err, activeRepo) ->
+      ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return sendErr(res, err.message) if err
         return sendErr(res, 'That repo is not active.') if not activeRepo?
-        plugin = _.findWhere initPlugins.sourceProviders, {NAME: req.params.pluginName}
-        plugin.deactivateRepo req.user, req.params.repoId, (err) ->
+        sourceProvider = _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
+        sourceProvider.deactivateRepo req.user, req.params.repoId, (err) ->
           sendErr(res, err.message) if err
-          ActiveRepo.findOneAndRemove {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err) ->
-            sendErr(res, err.message) if err
+          ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, (err, removedRepo) ->
+            repoPath = repoPathFor removedRepo
+            del.sync [repoPath]
+            return sendErr(res, err.message) if err
             res.send {success: 'Deactivated repository.'}
 
     app.use '/repos', router

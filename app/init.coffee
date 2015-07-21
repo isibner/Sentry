@@ -1,6 +1,6 @@
 module.exports = (dependencies) ->
   {
-    lib: {db, getActiveStatusForRepo, cloneAndHandleFiles},
+    lib: {db, getActiveStatusForRepo, repoQueueWorker, queueMap},
     packages, config, controllers
   } = dependencies
   {server: {ROOT, APP_ROOT, COOKIE_SECRET, CALLBACK_URL}, github: {CLIENT_ID, CLIENT_SECRET}, plugins} = config
@@ -74,57 +74,22 @@ module.exports = (dependencies) ->
       res.locals.user = req.user
       next()
 
-    # Peg source provider data to request
-    app.use (req, res, next) ->
-      async.map initPlugins.sourceProviders, ((sourceProvider, callback) ->
-        data =
-          name: sourceProvider.NAME
-          displayName: sourceProvider.DISPLAY_NAME
-          isAuthenticated: sourceProvider.isAuthenticated(req)
-          authEndpoint: "/plugins/source-providers/#{sourceProvider.NAME}/" + _.trimLeft(sourceProvider.AUTH_ENDPOINT, '/')
-          iconURL: "/plugins/source-providers/#{sourceProvider.NAME}/icon"
-        if not data.isAuthenticated
-          callback(null, data)
-        else
-          sourceProvider.getRepositoryListForUser req.user, (err, list) ->
-            return callback(err) if err
-            async.map list, getActiveStatusForRepo(sourceProvider.NAME, req.user._id), (err, activeData) ->
-              return callback(err) if err
-              data.repoList = activeData
-              callback(null, data)
-      ), (mapError, mapData) ->
-        return next(mapError) if mapError
-        _.each mapData, (sourceProvider) ->
-          sourceProvider.repoList = _.sortByOrder sourceProvider.repoList, ['active'], ['desc']
-          _.each sourceProvider.repoList, (repoObject) ->
-            inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), repoObject.activeServices
-            activeServicesAsObjects = _.map repoObject.activeServices, (serviceName) ->
-              rawService = _.findWhere initPlugins.services, {NAME: serviceName}
-              return {NAME: rawService.NAME, DISPLAY_NAME: rawService.DISPLAY_NAME, isAuthenticated: rawService.isAuthenticated(req), AUTH_ENDPOINT: rawService.AUTH_ENDPOINT, active: true}
-            inactiveServicesAsObjects = _.map inactiveServices, (serviceName) ->
-              rawService = _.findWhere initPlugins.services, {NAME: serviceName}
-              return {NAME: rawService.NAME, DISPLAY_NAME: rawService.DISPLAY_NAME, isAuthenticated: rawService.isAuthenticated(req), AUTH_ENDPOINT: rawService.AUTH_ENDPOINT, active: false}
-            repoObject.services = activeServicesAsObjects.concat(inactiveServicesAsObjects)
-        res.locals.sourceProviderData = mapData
-        next()
+    _.forEach initPlugins.sourceProviders, (sourceProvider) ->
+      sourceProvider.on 'hook', ({repoId}) ->
+        console.log "Running hooks for #{repoId}..."
+        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (err, docs) ->
+          return console.error(err, err.stack) if err
+          _.each docs, (activeRepo) ->
+            repoIdString = activeRepo._id.toString()
+            queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
+            queueMap[repoIdString].push {repo: activeRepo, initPlugins, isInitial: false}, (err) ->
+              return console.error(err, err.stack) if err
+              console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}) successfully!"
 
     _.forEach controllers, (controller) ->
       controller({app, initPlugins})
 
-    _.forEach initPlugins.sourceProviders, (sourceProvider) ->
-      sourceProvider.on 'hook', ({repoId}) ->
-        console.log 'hookin up'
-        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (err, docs) ->
-          return console.error(err, err.stack) if err
-          _.each docs, (activeRepo) ->
-            User.findById activeRepo.userId, (err, userModel) ->
-              #(cloneUrl, configObject, configKey
-              _.each activeRepo.activeServices, (serviceName) ->
-                service = _.findWhere initPlugins.services, {NAME: serviceName}
-                cloneAndHandleFiles sourceProvider.cloneUrl(userModel, activeRepo), activeRepo.configObject || {}, service.NAME, (err, files, tempPath) ->
-                  service.handleHookRepoData activeRepo, {files, tempPath}, (err) ->
-                    return console.error(err, err.stack) if err
-                    console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}, #{service.NAME}) successfully!"
+
 
     app.use (req, res, next) ->
       err = new Error('Not Found')

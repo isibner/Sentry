@@ -5,6 +5,7 @@ module.exports = (dependencies) ->
   return {
     ROOT: root
     APP_ROOT: path.join(root, 'app')
+    CLONE_ROOT: path.join(root, '.cloned_repos')
     COOKIE_SECRET: process.env.COOKIE_SECRET || '12345'
     BASE_URL: base
     DASHBOARD_URL: url.resolve(base, '/dashboard')

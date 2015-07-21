@@ -1,5 +1,5 @@
-sourceProviders = ['todobot-github-source', 'todobot-github-private-source']
-services = ['todobot-linecounting-service', 'sentry-cruft-service']
+sourceProviders = ['sentry-source-github']
+services = ['sentry-cruft-service']
 
 module.exports = (dependencies) ->
   {packages: {lodash: _}, config} = dependencies

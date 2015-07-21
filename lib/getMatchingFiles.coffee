@@ -1,8 +1,8 @@
 module.exports = (dependencies) ->
   {packages: {glob, path, lodash: _}} = dependencies
-  return (tempPath, configObject, configKey, callback) ->
-    includeFiles = configObject[configKey]?.includeFiles || configObject.includeFiles || ['**/*']
-    excludeFiles = configObject[configKey]?.excludeFiles || configObject.excludeFiles || []
+  return ({repoPath, configObject, serviceName}, callback) ->
+    includeFiles = configObject[serviceName]?.includeFiles || configObject.includeFiles || ['**/*']
+    excludeFiles = configObject[serviceName]?.excludeFiles || configObject.excludeFiles || []
     console.log excludeFiles
     excludeFiles.push '.git/**/*'
     matches = _.chain(includeFiles)
@@ -11,15 +11,15 @@ module.exports = (dependencies) ->
         nodir: true
         nonull: false
         ignore: excludeFiles
-        cwd: tempPath
-        root: tempPath
+        cwd: repoPath
+        root: repoPath
         dot: true
       }
     )
     .flatten()
     .uniq()
     .map((filePath) ->
-      return path.join(tempPath, filePath)
+      return path.join(repoPath, filePath)
     )
     .value()
     callback(null, matches)

@@ -1,6 +1,5 @@
 [
   "db.coffee",
-  "cloneIntoTemp.coffee",
-  "getMatchingFiles.coffee",
-  "cloneAndHandleFiles.coffee"
+  "repoPathFor.coffee",
+  "getMatchingFiles.coffee"
 ]
