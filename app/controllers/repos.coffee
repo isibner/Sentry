@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
-  {packages: {express, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto, queueMap, repoQueueWorker}} = dependencies
+  {packages: {express, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}} = dependencies
   ActiveRepo = db.model('ActiveRepo')
   router = express.Router()
   return ({app, initPlugins}) ->
@@ -18,7 +18,7 @@ module.exports = (dependencies) ->
         return sendErr(res, 'That repo is already active.') if activeRepo?
         sourceProvider = _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
         sourceProvider.activateRepo req.user, repoId, (err) ->
-          sendErr(res, err.message) if err
+          return sendErr(res, err.message) if err
           newActiveRepo = new ActiveRepo {repoId, sourceProviderName, userId}
           newActiveRepo.save (err, activeRepoWithId) ->
             return sendErr(res, err.message) if err
@@ -26,11 +26,7 @@ module.exports = (dependencies) ->
             cloneUrl = sourceProvider.cloneUrl(req.user, activeRepoWithId)
             cloneInto {repoPath, cloneUrl}, (err) ->
               return sendErr(res, err.message) if err
-              repoIdString = activeRepoWithId._id.toString()
-              queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
-              queueMap[repoIdString].push {repo: activeRepoWithId, initPlugins, isInitial: true}, (err) ->
-                return console.error(err, err.stack) if err
-                res.send {success: 'Successfully activated repository.'}
+              res.send {success: 'Successfully activated repository.'}
 
     router.get '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->
       {sourceProviderName, repoId} = req.params
@@ -41,7 +37,7 @@ module.exports = (dependencies) ->
         return sendErr(res, 'That repo is not active.') if not activeRepo?
         sourceProvider = _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
         sourceProvider.deactivateRepo req.user, req.params.repoId, (err) ->
-          sendErr(res, err.message) if err
+          return sendErr(res, err.message) if err
           ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, (err, removedRepo) ->
             repoPath = repoPathFor removedRepo
             del.sync [repoPath]

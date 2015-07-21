@@ -82,7 +82,7 @@ module.exports = (dependencies) ->
           _.each docs, (activeRepo) ->
             repoIdString = activeRepo._id.toString()
             queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
-            queueMap[repoIdString].push {repo: activeRepo, initPlugins, isInitial: false}, (err) ->
+            queueMap[repoIdString].push {repo: activeRepo, initPlugins}, (err) ->
               return console.error(err, err.stack) if err
               console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}) successfully!"
 
