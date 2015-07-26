@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
-  {packages: {express, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}} = dependencies
+  {packages: {express, path, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}, config} = dependencies
   ActiveRepo = db.model('ActiveRepo')
   router = express.Router()
   return ({app, initPlugins}) ->
@@ -8,8 +8,9 @@ module.exports = (dependencies) ->
     sendErr = (res, msg) ->
       res.send {error: msg}
 
-    # TODO change to PUT for ajax goodness
+    # TODO change to PUT and do some AJAX
     router.get '/activate/:sourceProviderName/:repoId', (req, res) ->
+      req.setTimeout(5 * 60 * 1000)
       {sourceProviderName, repoId} = req.params
       userId = req.user._id
 
@@ -24,7 +25,10 @@ module.exports = (dependencies) ->
             return sendErr(res, err.message) if err
             repoPath = repoPathFor activeRepoWithId
             cloneUrl = sourceProvider.cloneUrl(req.user, activeRepoWithId)
-            cloneInto {repoPath, cloneUrl}, (err) ->
+            sshKeypath = config[sourceProviderName]?.SSH_KEYPATH
+            gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
+            console.log ('preparing t clone with ' + gitCommand)
+            cloneInto {repoPath, cloneUrl, gitCommand}, (err) ->
               return sendErr(res, err.message) if err
               res.send {success: 'Successfully activated repository.'}
 

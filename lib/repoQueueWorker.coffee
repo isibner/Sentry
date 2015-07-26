@@ -1,8 +1,10 @@
 module.exports = (dependencies) ->
-  {packages: {async, child_process, path, lodash: _}, lib: {repoPathFor, getMatchingFiles}} = dependencies
+  {packages: {async, child_process, path, lodash: _}, lib: {repoPathFor, getMatchingFiles}, config} = dependencies
   return ({repo, initPlugins: {services, sourceProviders}, serviceToInitialize}, callback) ->
     repoPath = repoPathFor repo
-    child_process.exec "cd #{repoPath} && git fetch", (err, stdout) ->
+    sshKeypath = config[repo.sourceProviderName]?.SSH_KEYPATH
+    gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
+    child_process.exec "cd #{repoPath} && #{gitCommand} fetch", (err, stdout) ->
       return callback(err) if err
       if serviceToInitialize
         serviceName = serviceToInitialize.NAME

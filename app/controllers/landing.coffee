@@ -2,7 +2,8 @@ module.exports = (dependencies) ->
   {packages: {lodash: _, express, async}, middleware: {auth}, lib: {getActiveStatusForRepo}} = dependencies
   router = express.Router()
   return ({app, initPlugins}) ->
-    router.get '/', (req, res) -> res.render 'index', {isIndex: true}
+    router.get '/', (req, res) ->
+      res.render 'index', {isIndex: true}
 
     router.get '/logout', (req, res) ->
       req.logout()
@@ -10,7 +11,7 @@ module.exports = (dependencies) ->
       res.redirect '/'
 
     # Peg source provider data to request
-    router.use '/dashboard', (req, res, next) ->
+    router.use '/dashboard', auth.ensureAuthenticated, (req, res, next) ->
       async.map initPlugins.sourceProviders, ((sourceProvider, callback) ->
         data =
           name: sourceProvider.NAME
@@ -43,6 +44,6 @@ module.exports = (dependencies) ->
         res.locals.sourceProviderData = mapData
         next()
 
-    router.get '/dashboard', auth.ensureAuthenticated, (req, res) -> res.render 'dashboard'
+    router.get '/dashboard', (req, res) -> res.render 'dashboard'
 
     app.use '/', router

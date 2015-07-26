@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
   {packages: {child_process, mkdirp}, lib: {repoPathFor}} = dependencies
-  return ({repoPath, cloneUrl}, callback) ->
+  return ({repoPath, cloneUrl, gitCommand}, callback) ->
     mkdirp.sync repoPath
-    child_process.exec "git clone #{cloneUrl} #{repoPath} && cd #{repoPath} && git fetch", callback
+    child_process.exec "#{gitCommand} clone #{cloneUrl} #{repoPath} && cd #{repoPath} && #{gitCommand} fetch", callback

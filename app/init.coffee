@@ -10,11 +10,18 @@ module.exports = (dependencies) ->
   User = db.model('User')
   ActiveRepo = db.model('ActiveRepo')
   return (app) ->
+
     # Initialize all plugins and sourceProviders
     initPlugins = {}
     {sourceProviders, services} = plugins
     initPlugins.sourceProviders = _.map sourceProviders, (Provider) -> new Provider({config, packages})
     initPlugins.services = _.map services, (Service) -> new Service({config, db, packages, sourceProviders: initPlugins.sourceProviders})
+
+    # See https://github.com/expressjs/body-parser/issues/100
+    app.use (req, res, next) ->
+      if req.headers?['content-encoding'] is 'utf-8' or req.headers?['content-encoding'] is 'UTF-8'
+        delete req.headers['content-encoding']
+      next()
 
     app.disable 'x-powered-by'
     app.set 'views', path.join(APP_ROOT, 'views')
@@ -35,8 +42,8 @@ module.exports = (dependencies) ->
     app.set 'view engine', '.hbs'
     app.set 'port', process.env.PORT || 3000
     app.use favicon(path.join ROOT, '/public/favicons/favicon.ico')
-    app.use bodyParser.urlencoded({extended: false})
-    app.use bodyParser.json()
+    app.use bodyParser.urlencoded({extended: false, limit: '50mb'})
+    app.use bodyParser.json({limit: '50mb'})
     app.use expressValidator()
     app.use cookieParser(COOKIE_SECRET)
     app.use session(
