@@ -7,6 +7,6 @@ module.exports = (dependencies) ->
     },
     {
       name: 'Ignored Tests'
-      regex: /^[\+|\-]?[\s]*@Ignored/i
+      regex: /^[\s]*@Ignore/i
     }
   ]

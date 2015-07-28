@@ -3,7 +3,6 @@ module.exports = (dependencies) ->
   return ({repoPath, configObject, serviceName}, callback) ->
     includeFiles = configObject[serviceName]?.includeFiles || configObject.includeFiles || ['**/*']
     excludeFiles = configObject[serviceName]?.excludeFiles || configObject.excludeFiles || []
-    console.log excludeFiles
     excludeFiles.push '.git/**/*'
     matches = _.chain(includeFiles)
     .map((pattern) ->

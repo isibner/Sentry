@@ -20,6 +20,14 @@ module.exports = (dependencies) ->
       console.log service.NAME
       serviceRouter.use ('/' + service.NAME), pluginRouter
 
+    noAuthServiceRouter = express.Router()
+    for service in services
+      pluginRouter = express.Router()
+      if service.initializePublicEndpoints?
+        service.initializePublicEndpoints(pluginRouter)
+        noAuthServiceRouter.use ('/' + service.NAME), pluginRouter
+
     router.use '/source-providers', sourceProvidersRouter
+    router.use '/services', noAuthServiceRouter
     router.use '/services', auth.ensureAuthenticated, serviceRouter
     app.use '/plugins', router
