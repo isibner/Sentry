@@ -31,11 +31,13 @@ module.exports = (dependencies) ->
       handlebars: handlebars
       layoutsDir: path.join(APP_ROOT, 'views', 'layouts')
       partialsDir: path.join(APP_ROOT, 'views', 'partials')
+      # coffeelint: disable=missing_fat_arrows
       helpers:
         toJSON: (obj) -> JSON.stringify(obj, null, '  ')
         addOrRemove: -> if this.todoBotActive then 'remove' else 'add'
         isRemove: -> this.todoBotActive
         addOrRemoveCaps: -> if this.todoBotActive then 'Remove' else 'Add'
+      # coffeelint: enable=missing_fat_arrows
     )
     handlebars.registerHelper 'encodeUri', (uri) ->
       return new handlebars.SafeString(encodeURIComponent uri)
@@ -84,13 +86,15 @@ module.exports = (dependencies) ->
     _.forEach initPlugins.sourceProviders, (sourceProvider) ->
       sourceProvider.on 'hook', ({repoId}) ->
         console.log "Running hooks for #{repoId}..."
-        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (err, docs) ->
-          return console.error(err, err.stack) if err
+        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (mongoError, docs) ->
+          return console.error(mongoError, mongoError.stack) if mongoError
           _.each docs, (activeRepo) ->
             repoIdString = activeRepo._id.toString()
             queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
-            queueMap[repoIdString].push {repo: activeRepo, initPlugins}, (err) ->
-              return console.error(err, err.stack) if err
+            queueMap[repoIdString].push {repo: activeRepo, initPlugins}, (queueProcessErr) ->
+              if queueProcessErr?
+                msg = "Error handling #{repoIdString} for #{activeRepo.repoId}"
+                return console.error msg, queueProcessErr, queueProcessErr.stack
               console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}) successfully!"
 
     _.forEach controllers, (controller) ->

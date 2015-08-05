@@ -5,18 +5,17 @@ module.exports = (dependencies) ->
   return ({app}) ->
     router.post '/', (req, res, next) ->
       {username, password} = req.body
-      User.findOne {username}, (err, user) ->
+      User.findOne {username}, (userFindError, user) ->
         if user
           req.flash 'error', 'Username taken'
           return res.redirect '/register'
-        return next(err) if err
+        return next(userFindError) if userFindError?
         hashedPassword = bcryptjs.hashSync(password, bcryptjs.genSaltSync(10))
         user = new User {username, hashedPassword}
-        user.save (err) ->
-          return next(err) if err
+        user.save (saveError) ->
+          return next(saveError) if saveError?
           passport.authenticate('local') req, res, ->
             res.redirect '/dashboard'
-
 
     router.get '/', (req, res) -> res.render 'register'
 

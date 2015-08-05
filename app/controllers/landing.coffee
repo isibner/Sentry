@@ -10,6 +10,7 @@ module.exports = (dependencies) ->
       req.flash 'success', 'Logged out successfully.'
       res.redirect '/'
 
+    # TODO: Move /dashboard into another file
     # Peg source provider data to request
     router.use '/dashboard', auth.ensureAuthenticated, (req, res, next) ->
       async.map initPlugins.sourceProviders, ((sourceProvider, callback) ->
@@ -22,10 +23,10 @@ module.exports = (dependencies) ->
         if not data.isAuthenticated
           callback(null, data)
         else
-          sourceProvider.getRepositoryListForUser req.user, (err, list) ->
-            return callback(err) if err
-            async.map list, getActiveStatusForRepo(sourceProvider.NAME, req.user._id), (err, activeData) ->
-              return callback(err) if err
+          sourceProvider.getRepositoryListForUser req.user, (sourceProviderError, list) ->
+            return callback(sourceProviderError) if sourceProviderError?
+            async.map list, getActiveStatusForRepo(sourceProvider.NAME, req.user._id), (getRepoActiveStatusError, activeData) ->
+              return callback(getRepoActiveStatusError) if getRepoActiveStatusError?
               data.repoList = activeData
               callback(null, data)
       ), (mapError, mapData) ->
@@ -36,6 +37,7 @@ module.exports = (dependencies) ->
             inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), repoObject.activeServices
             activeServicesAsObjects = _.map repoObject.activeServices, (serviceName) ->
               rawService = _.findWhere initPlugins.services, {NAME: serviceName}
+              # TODO: Refactor so these lines aren't so INSANELY LONG
               return {NAME: rawService.NAME, DISPLAY_NAME: rawService.DISPLAY_NAME, isAuthenticated: rawService.isAuthenticated(req), AUTH_ENDPOINT: rawService.AUTH_ENDPOINT, active: true}
             inactiveServicesAsObjects = _.map inactiveServices, (serviceName) ->
               rawService = _.findWhere initPlugins.services, {NAME: serviceName}

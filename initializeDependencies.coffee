@@ -48,7 +48,7 @@ specifiedFiles = (require './lib/loadOrder.json').map (filename) ->
   return path.join libDir, filename
 unspecifiedFiles = _.difference glob.sync(path.join libDir, '**/*.coffee'), specifiedFiles
 dependencies.lib = {}
-for file in (specifiedFiles.concat unspecifiedFiles)
+_.forEach (specifiedFiles.concat unspecifiedFiles), (file) ->
   packageName = removeExtension(path.relative libDir, file)
   dependencies.lib[packageName] = require(file)(dependencies)
 

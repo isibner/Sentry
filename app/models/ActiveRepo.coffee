@@ -12,7 +12,9 @@ module.exports = (dependencies) ->
   ActiveRepoSchema.path('configObject').default -> {includeFiles: ['**/*'], excludeFiles: []} # New empty config object for every repo
   ActiveRepoSchema.plugin findOrCreate
 
+  # coffeelint: disable=missing_fat_arrows
   ActiveRepoSchema.methods.getPath = () -> return this._id.toString()
+  # coffeelint: enable=missing_fat_arrows
 
   ActiveRepo = mongoose.model 'ActiveRepo', ActiveRepoSchema
   return {

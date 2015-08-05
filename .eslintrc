@@ -3,8 +3,11 @@
     "node": true
   },
   "rules": {
-    "brace-style": [2, "1tbs"],
+    "brace-style": 0,
+    "curly": 0,
     "camelcase": 0,
+    "dot-notation":0,
+    "new-cap": 0,
     "no-alert": 2,
     "no-bitwise": 2,
     "no-empty": 2,
@@ -14,13 +17,15 @@
     "no-mixed-spaces-and-tabs": 2,
     "no-multi-spaces": 0,
     "no-reserved-keys": 2,
-    "no-tabs": 2,
-    "no-underscore-dangle": 2,
-    "quotes": [2, "single", "avoid-escape"],
-    "space-after-function": 2,
-    "space-after-keywords": 2,
-    "space-before-blocks": 2,
-    "space-infix-ops": 2,
+    "no-underscore-dangle": 0,
+    "no-unused-expressions": 0,
+    "no-unused-vars": 0,
+    "quotes": 0,
+    "space-after-keywords": 0,
+    "space-before-blocks": 0,
+    "space-infix-ops": 0,
+    "no-return-assign": false,
+    "no-sequences": false,
     "strict": 0
   }
 }

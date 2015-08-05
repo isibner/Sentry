@@ -3,7 +3,7 @@ module.exports = (dependencies) ->
   router = express.Router()
   return ({app, initPlugins: {sourceProviders, services}}) ->
     sourceProvidersRouter = express.Router()
-    for sourceProvider in sourceProviders
+    _.forEach sourceProviders, (sourceProvider) ->
       pluginRouter = express.Router()
       sourceProvider.initializeHooks(pluginRouter)
       pluginRouter.use auth.ensureAuthenticated
@@ -13,15 +13,14 @@ module.exports = (dependencies) ->
       sourceProvidersRouter.use ('/' + sourceProvider.NAME), pluginRouter
 
     serviceRouter = express.Router()
-    for service in services
+    _.forEach services, (service) ->
       pluginRouter = express.Router()
       service.initializeAuthEndpoints(pluginRouter)
       service.initializeOtherEndpoints(pluginRouter)
-      console.log service.NAME
       serviceRouter.use ('/' + service.NAME), pluginRouter
 
     noAuthServiceRouter = express.Router()
-    for service in services
+    _.forEach services, (service) ->
       pluginRouter = express.Router()
       if service.initializePublicEndpoints?
         service.initializePublicEndpoints(pluginRouter)

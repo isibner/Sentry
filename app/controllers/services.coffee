@@ -16,25 +16,24 @@ module.exports = (dependencies) ->
         next()
 
     # TODO change to pOSt for ajax goodness
+    # TODO async.waterfall()
     router.get '/activate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       activeRepo = req.activeRepo
       if _.contains(activeRepo.activeServices, req.params.serviceName)
         req.flash('error', 'Service already active!')
         return res.redirect '/dashboard'
       service = _.findWhere initPlugins.services, {NAME: req.params.serviceName}
-      service.activateServiceForRepo activeRepo, (err, successMessage) ->
-        next(err) if err
+      service.activateServiceForRepo activeRepo, (activateServiceError, successMessage) ->
+        next(activateServiceError) if activateServiceError
         activeRepo.activeServices.push req.params.serviceName
         activeRepo.markModified 'activeServices'
-        activeRepo.save (err, activeRepo) ->
-          return sendErr(res, err.message) if err
-          repoIdString = activeRepo._id.toString()
+        activeRepo.save (saveError, savedActiveRepo) ->
+          return sendErr(res, saveError.message) if saveError
+          repoIdString = savedActiveRepo._id.toString()
           queueMap[repoIdString] ?= async.queue(repoQueueWorker, 1)
-          queueMap[repoIdString].push {repo: activeRepo, initPlugins, serviceToInitialize: service}, (err) ->
-            return sendErr(res, err.message) if err
+          queueMap[repoIdString].push {repo: savedActiveRepo, initPlugins, serviceToInitialize: service}, (queueProcessError) ->
+            return sendErr(res, queueProcessError.message) if queueProcessError
             res.send(successMessage)
-
-
 
     router.get '/deactivate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       service = _.findWhere initPlugins.services, {NAME: req.params.serviceName}
@@ -42,12 +41,12 @@ module.exports = (dependencies) ->
       if not _.contains(activeRepo.activeServices, req.params.serviceName)
         req.flash('error', "Could not deactivate #{service.DISPLAY_NAME} - it was not active!")
         return res.redirect '/dashboard'
-      service.deactivateServiceForRepo activeRepo, (err, successMessage) ->
-        next(err) if err
+      service.deactivateServiceForRepo activeRepo, (deactivateServiceError, successMessage) ->
+        next(deactivateServiceError) if deactivateServiceError
         activeRepo.activeServices = _.without activeRepo.activeServices, req.params.serviceName
         activeRepo.markModified 'activeServices'
-        activeRepo.save (err) ->
-          next(err) if err
+        activeRepo.save (saveError) ->
+          next(saveError) if saveError
           res.send(successMessage)
 
     app.use '/services', router
