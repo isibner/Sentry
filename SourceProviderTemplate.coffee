@@ -5,7 +5,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
 
   # Construct a new ExampleSourceProvider.
   # @param {Object} options The options hash for this object.
-  # @param {Object} options.config The configuration object for this instance of TodoBot.
+  # @param {Object} options.config The configuration object for this instance of Sentry.
   #   This includes server config, plugins config, and any other config files you add.
   #   If your source provider has a user config file, it will be passed as `config[@NAME]`, where @NAME
   #   is the internal name of this class (specified below).
