@@ -5,7 +5,7 @@ cslint = require 'gulp-cslint'
 console.log cslint
 
 gulp.task 'lint:coffee', ->
-  gulp.src(['{app, config, lib, test}/**/*.coffee', '*.coffee'])
+  gulp.src(['{app,config,lib,test}/**/*.coffee', '*.coffee'])
     .pipe(do coffeelint)
     .pipe(do coffeelint.reporter)
 
