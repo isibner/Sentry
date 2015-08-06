@@ -4,7 +4,6 @@ module.exports = (dependencies) ->
     repoPath = repoPathFor repo
     sshKeypath = config[repo.sourceProviderName]?.SSH_KEYPATH
     gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
-    console.log gitCommand, repoPath
     child_process.exec "#{gitCommand} fetch --all && #{gitCommand} pull --all", {cwd: repoPath}, (err, stdout, stderr) ->
       return callback(err) if err
       if serviceToInitialize

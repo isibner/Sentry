@@ -34,9 +34,10 @@ dependencies.config =
   .mapKeys((value, fileName) -> removeExtension path.relative(configDir, fileName))
   .value()
 
-# Instantiate the Sentry plugin objects
-dependencies.config.plugins = _.mapValues dependencies.config.plugins, (pluginModule) ->
-  return new (require pluginModule)
+# Actually require the plugins
+dependencies.config.plugins = _.mapValues dependencies.config.plugins, (arrayOfPlugins) ->
+  console.log("Using plugin #{pluginName}") for pluginName in arrayOfPlugins
+  return _.map arrayOfPlugins, require
 
 # Next models, which can depend on config and packages
 modelsDir = path.join __dirname, 'app/models/'
