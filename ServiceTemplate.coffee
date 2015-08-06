@@ -4,7 +4,7 @@ class ExampleService
 
   # Construct a new ExampleService.
   # @param {Object} options The options hash for this object.
-  # @param {Object} options.config The configuration object for this instance of TodoBot.
+  # @param {Object} options.config The configuration object for this instance of Sentry.
   #   This includes server config, plugins config, and any other config files you add.
   #   If your source provider has a user config file, it will be passed as `config[@NAME]`, where @NAME
   #   is the internal name of this class (specified below).
@@ -46,11 +46,10 @@ class ExampleService
   initializeAuthEndpoints: (router) ->
 
   # Initialize other endpoints that your service plans to use. These endpoints WILL require a user to be logged in to
-  # view them - unauthenticated users will not be able to see these endpoints, and you should further check
+  # view them - unauthenticated users will not be able to see these endpoints. You may want to further check
   # to make sure that only the owner of a repository can view it.
   # @param {Object} router The express router which will be mounted at /plugins/services/{@NAME}
   initializeOtherEndpoints: (router) ->
-    # TODO - the check to see if the user is the one who activated the repo should be done in Sentry itself
 
   # Initialize public endpoints for this service. These WILL NOT require a user to be logged in or even to have
   # an account. Useful for providing public data about public projects.

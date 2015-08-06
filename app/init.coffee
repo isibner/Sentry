@@ -31,13 +31,8 @@ module.exports = (dependencies) ->
       handlebars: handlebars
       layoutsDir: path.join(APP_ROOT, 'views', 'layouts')
       partialsDir: path.join(APP_ROOT, 'views', 'partials')
-      # coffeelint: disable=missing_fat_arrows
       helpers:
         toJSON: (obj) -> JSON.stringify(obj, null, '  ')
-        addOrRemove: -> if this.todoBotActive then 'remove' else 'add'
-        isRemove: -> this.todoBotActive
-        addOrRemoveCaps: -> if this.todoBotActive then 'Remove' else 'Add'
-      # coffeelint: enable=missing_fat_arrows
     )
     handlebars.registerHelper 'encodeUri', (uri) ->
       return new handlebars.SafeString(encodeURIComponent uri)
