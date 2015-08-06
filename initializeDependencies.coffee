@@ -7,6 +7,12 @@ removeExtension = (filePath) ->
   return filePath.substring(0, filePath.length - extension.length)
 
 dependencies = {}
+
+loadLocalDependency = (fileName) ->
+  depExports = require fileName
+  return depExports(dependencies) if _.isFunction depExports
+  return depExports
+
 # Packages are the base; they obviously must stand alone
 builtins = ['fs', 'path', 'url', 'child_process']
 fromPackageJson = Object.keys (require './package.json').dependencies
@@ -17,7 +23,6 @@ dependencies.packages =
   .mapValues((packageName) -> require(packageName))
   .value()
 
-
 # Next comes /config, which should have no deps other than the packages
 configDir = path.join __dirname, 'config/'
 configPaths = glob.sync(path.join configDir, '**/*.coffee')
@@ -25,9 +30,13 @@ dependencies.config =
   _.chain(configPaths)
   .map((fileName) -> [fileName, fileName])
   .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapValues(loadLocalDependency)
   .mapKeys((value, fileName) -> removeExtension path.relative(configDir, fileName))
   .value()
+
+# Instantiate the Sentry plugin objects
+dependencies.config.plugins = _.mapValues dependencies.config.plugins, (pluginModule) ->
+  return new (require pluginModule)
 
 # Next models, which can depend on config and packages
 modelsDir = path.join __dirname, 'app/models/'
@@ -36,13 +45,13 @@ dependencies.models =
   _.chain(modelPaths)
   .map((fileName) -> [fileName, fileName])
   .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapValues(loadLocalDependency)
   .mapKeys((value, fileName) -> _.capitalize(removeExtension(path.relative(modelsDir, fileName))))
   .value()
 
 # Lib is tricky; lib files can depend on one another.
-# Toposort seems like overkill for this scale; so we'll use a magic JSON file instead.
-# We'll also load files that aren't specified after those that are (in undefined order).
+# Toposort seems like overkill for this scale, so we'll use a magic JSON file (loadOrder.json) instead.
+# We'll also load files that aren't specified in loadOrder.json after those that are listed.
 libDir = path.join __dirname, 'lib/'
 specifiedFiles = (require './lib/loadOrder.json').map (filename) ->
   return path.join libDir, filename
@@ -50,7 +59,7 @@ unspecifiedFiles = _.difference glob.sync(path.join libDir, '**/*.coffee'), spec
 dependencies.lib = {}
 _.forEach (specifiedFiles.concat unspecifiedFiles), (file) ->
   packageName = removeExtension(path.relative libDir, file)
-  dependencies.lib[packageName] = require(file)(dependencies)
+  dependencies.lib[packageName] = loadLocalDependency(file)
 
 # Next middleware, which shouldn't depend on one another
 middlewareDir = path.join __dirname, 'app/middleware/'
@@ -59,7 +68,7 @@ dependencies.middleware =
   _.chain(middlewarePaths)
   .map((fileName) -> [fileName, fileName])
   .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapValues(loadLocalDependency)
   .mapKeys((value, fileName) -> removeExtension path.relative(middlewareDir, fileName))
   .value()
 
@@ -71,7 +80,7 @@ dependencies.controllers =
   _.chain(controllerPaths)
   .map((fileName) -> [fileName, fileName])
   .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapValues(loadLocalDependency)
   .mapKeys((value, fileName) -> removeExtension path.relative(controllerDir, fileName))
   .value()
 
@@ -82,7 +91,7 @@ dependencies.appInitializers =
   _.chain(appPaths)
   .map((fileName) -> [fileName, fileName])
   .zipObject()
-  .mapValues((fileName) -> require(fileName)(dependencies))
+  .mapValues(loadLocalDependency)
   .mapKeys((value, fileName) -> removeExtension path.relative(appDir, fileName))
   .value()
 
