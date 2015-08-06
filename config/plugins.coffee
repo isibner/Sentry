@@ -1,4 +1,4 @@
 sourceProviders = ['sentry-source-github']
-services = ['sentry-cruft-service']
+services = ['sentry-service-cruft']
 
 module.exports = {sourceProviders, services}
