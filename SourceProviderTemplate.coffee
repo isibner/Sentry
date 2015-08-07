@@ -14,7 +14,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
     ###############################
     #~~~~~~~~~ CONSTANTS ~~~~~~~~~#
     ###############################
-    # Constants shoudl be defined on the class instance in the constructor.
+    # Constants should be defined on the class instance in the constructor.
 
     # The name of your source provider, in kebab-case.
     @NAME = 'your_internal_source_provider_name'
