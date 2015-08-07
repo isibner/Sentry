@@ -34,8 +34,6 @@ module.exports = (dependencies) ->
       helpers:
         toJSON: (obj) -> JSON.stringify(obj, null, '  ')
     )
-    handlebars.registerHelper 'encodeUri', (uri) ->
-      return new handlebars.SafeString(encodeURIComponent uri)
     app.set 'view engine', '.hbs'
     app.set 'port', process.env.PORT || 3000
     app.use favicon(path.join ROOT, '/public/favicons/favicon.ico')

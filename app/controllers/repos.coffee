@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
-  {packages: {express, path, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}, config} = dependencies
+  {packages: {async, express, path, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}, config} = dependencies
   ActiveRepo = db.model('ActiveRepo')
   router = express.Router()
   return ({app, initPlugins}) ->
@@ -34,13 +34,13 @@ module.exports = (dependencies) ->
       newActiveRepo = new ActiveRepo {repoId, sourceProviderName, userId}
       newActiveRepo.save callback
 
-    removeRepoFromDatabase = ({userObject, sourceProviderName, repoId}) -> (callback) ->
-      ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, callback
+    removeRepoFromDatabase = ({userId, sourceProviderName, repoId}) -> (callback) ->
+      ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, (err, removedRepo) -> callback(err, removedRepo)
 
-    cloneRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, callback) ->
+    cloneRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, numAffected, callback) ->
       sourceProvider = getSourceProviderSync(sourceProviderName)
       repoPath = repoPathFor activeRepoWithId
-      cloneUrl = sourceProvider.cloneUrl(req.user, activeRepoWithId)
+      cloneUrl = sourceProvider.cloneUrl(userObject, activeRepoWithId)
       sshKeypath = config[sourceProviderName]?.SSH_KEYPATH
       gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
       console.log ("preparing to clone #{repoId} with command: " + gitCommand)
