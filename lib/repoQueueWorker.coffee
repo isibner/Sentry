@@ -2,20 +2,20 @@ module.exports = (dependencies) ->
   {packages: {async, child_process, path, lodash: _}, lib: {repoPathFor, getMatchingFiles}, config} = dependencies
   return ({repo, initPlugins: {services, sourceProviders}, serviceToInitialize}, callback) ->
     repoPath = repoPathFor repo
-    sshKeypath = config[repo.sourceProviderName]?.SSH_KEYPATH
+    {sourceProviderName, configObject, activeServices} = repo
+    sshKeypath = config[sourceProviderName]?.SSH_KEYPATH
     gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
     child_process.exec "#{gitCommand} fetch --all && #{gitCommand} pull --all", {cwd: repoPath}, (err, stdout, stderr) ->
-      return callback(err) if err
-      if serviceToInitialize
+      return callback(err) if err?
+      if serviceToInitialize?
         serviceName = serviceToInitialize.NAME
-        getMatchingFiles {repoPath, serviceName, configObject: repo.configObject}, (err, files) ->
-          return callback(err) if err
-          # TODO change temppath to something just repopath; make this one arg
-          serviceToInitialize.handleInitialRepoData repo, {files, tempPath: repoPath}, callback
+        getMatchingFiles {repoPath, serviceName, configObject}, (err, files) ->
+          return callback(err) if err?
+          serviceToInitialize.handleInitialRepoData {files, repoPath, repoModel: repo}, callback
       else
-        async.each repo.activeServices, ((serviceName, eachCallback) ->
+        async.each activeServices, ((serviceName, eachCallback) ->
           service = _.findWhere services, {NAME: serviceName}
-          getMatchingFiles {repoPath, serviceName, configObject: repo.configObject}, (err, files) ->
+          getMatchingFiles {repoPath, serviceName, configObject}, (err, files) ->
             return eachCallback(err) if err
-            service.handleHookRepoData repo, {files, tempPath: repoPath}, eachCallback
+            service.handleHookRepoData {files, repoPath, repoModel: repo}, eachCallback
         ), callback

@@ -5,11 +5,11 @@ module.exports = (dependencies) ->
     repoId: {type: String, required: true},
     userId: {type: ObjectId, required: true},
     sourceProviderName: {type: String, required: true},
-    configObject: {type: Mixed}
+    configObject: {type: Mixed},
     activeServices: {type: [String]}
   }
   ActiveRepoSchema.path('activeServices').default -> [] # New empty array for every active repo's services
-  ActiveRepoSchema.path('configObject').default -> {includeFiles: ['**/*'], excludeFiles: []} # New empty config object for every repo
+  ActiveRepoSchema.path('configObject').default -> {includeFiles: ['**/*'], excludeFiles: []} # New default config object for every repo
   ActiveRepoSchema.plugin findOrCreate
 
   # coffeelint: disable=missing_fat_arrows

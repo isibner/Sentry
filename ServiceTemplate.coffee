@@ -58,8 +58,8 @@ class ExampleService
 
   # Activate this service for the given repository.
   # @param {Object} repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
-  #   as fields. It's best practice not to add fields and bloat this model, but create your own Mongoose model to represent
-  #   you service data.
+  #   as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
+  #   your service data.
   # @param {Function} callback Node style callback that takes two arguments: (err, successMessage).
   #    `err` should contain an error, if one occurred during activation, or be null (or undefined) if no error occurred.
   #    `successMessage` is a String that will be flashed to the user if the activation was successful.
@@ -68,34 +68,34 @@ class ExampleService
 
   # Handle the initial data from this repository. Some services need to know about the initial state of the repo, and run
   # different code on hooks; others may delegate `handleInitialRepoData` and `handleHookRepoData` to the same function.
-  # @param {Object} repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
-  #   as fields. It's best practice not to add fields and bloat this model, but create your own Mongoose model to represent
-  #   you service data.
-  # @param {Object} fileOptions An object with two fields, `files` and `tempPath`, with data about which files to check.
-  #   fileOptions.files {Array<String>} A list of file paths to handle, relative to `tempPath`.
-  #   fileOptions.tempPath {String} The path of the directory in which to find the file paths in the `files` array.
+  # @param {Object} fileOptions An object with data about which files to check.
+  #   fileOptions.files {Array<String>} A list of file paths to handle, relative to `repoPath`.
+  #   fileOptions.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+  #   as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
+  #   your service data.
+  #   fileOptions.repoPath {String} The path of the directory in which to find the file paths in the `files` array.
   # @param {Function} callback Node style callback that takes one argument: (err).
   #    `err` should contain an error, if one occurred during activation, or be null (or undefined) if no error occurred.
-  handleInitialRepoData: (repoModel, {files, tempPath}, callback) ->
+  handleInitialRepoData: ({files, repoModel, repoPath}, callback) ->
     {repoId, userId, sourceProviderName} = repoModel
 
   # Handle the data from a hook to this repository. Some services need to know about the initial state of the repo, and run
   # different code on hooks; others may delegate `handleInitialRepoData` and `handleHookRepoData` to the same function.
-  # @param {Object} repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
-  #   as fields. It's best practice not to add fields and bloat this model, but create your own Mongoose model to represent
-  #   you service data.
-  # @param {Object} fileOptions An object with two fields, `files` and `tempPath`, with data about which files to check.
-  #   fileOptions.files {Array<String>} A list of file paths to handle, relative to `tempPath`.
-  #   fileOptions.tempPath {String} The path of the directory in which to find the file paths in the `files` array.
+  # @param {Object} fileOptions An object with data about which files to check.
+  #   fileOptions.files {Array<String>} A list of file paths to handle, relative to `repoPath`.
+  #   fileOptions.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+  #   as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
+  #   your service data.
+  #   fileOptions.repoPath {String} The path of the directory in which to find the file paths in the `files` array.
   # @param {Function} callback Node style callback that takes one argument: (err).
   #    `err` should contain an error, if one occurred during activation, or be null (or undefined) if no error occurred.
-  handleHookRepoData: (repoModel, {files, tempPath}, callback) ->
+  handleHookRepoData: ({files, repoModel, repoPath}, callback) ->
     {repoId, userId, sourceProviderName} = repoModel
 
   # Deactivate this service for the given repository.
   # @param {Object} repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
-  #   as fields. It's best practice not to add fields and bloat this model, but create your own Mongoose model to represent
-  #   you service data.
+  #   as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
+  #   your service data.
   # @param {Function} callback Node style callback that takes two arguments: (err, successMessage).
   #    `err` should contain an error, if one occurred during deactivation, or be null (or undefined) if no error occurred.
   #    `successMessage` is a String that will be flashed to the user if the deactivation was successful.

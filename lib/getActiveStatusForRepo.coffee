@@ -6,20 +6,10 @@ module.exports = (dependencies) ->
     return ({name, id}, callback) ->
       repoId = id
       ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
-        return callback(err) if err
-        if activeRepo
-          callback null, {
-            active: true,
-            name: name,
-            id: id,
-            sourceProviderName: sourceProviderName,
-            activeServices: activeRepo.activeServices
-          }
+        return callback(err) if err?
+        if activeRepo?
+          {activeServices} = activeRepo
+          callback null, {name, id, sourceProviderName, activeServices, active: true}
         else
-          callback null, {
-            active: false,
-            name: name,
-            sourceProviderName: sourceProviderName,
-            id: id
-          }
+          callback null, {name, sourceProviderName, id, active: false}
 

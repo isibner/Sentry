@@ -17,6 +17,8 @@ module.exports = (dependencies) ->
       pluginRouter = express.Router()
       service.initializeAuthEndpoints(pluginRouter)
       service.initializeOtherEndpoints(pluginRouter)
+      pluginRouter.get '/icon', (req, res) ->
+        return res.sendFile service.ICON_FILE_PATH
       serviceRouter.use ('/' + service.NAME), pluginRouter
 
     noAuthServiceRouter = express.Router()
