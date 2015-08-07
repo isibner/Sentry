@@ -25,41 +25,35 @@ var ServiceView = Mn.ItemView.extend({
   // TODO add click event to AJAX and activate/deactivate repo
 });
 
-var ActiveRepoView = Mn.CompositeView.extend({
+var RepoView = Mn.CompositeView.extend({
   childView: ServiceView,
   childViewContainer: '.services-container',
-  template: '#repo-template-active',
+  template: function (serializedModel) {
+    var selector = serializedModel.active ? '#repo-template-active': '#repo-template-inactive';
+    return _.template($(selector).html())(serializedModel);
+  },
+  modelEvents: {
+    'change': 'render'
+  },
   initialize: function () {
     this.collection = this.model.get('serviceCollection');
   }
 });
 
-var InactiveRepoView = Mn.ItemView.extend({
-  template: '#repo-template-inactive'
-})
-
-var AuthenticatedSourceProviderView = Mn.CompositeView.extend({
-  getChildView: function (repo) {
-    if (repo.get('active')) {
-      return ActiveRepoView;
-    }
-    return InactiveRepoView;
-  },
+var SourceProviderView = Mn.CompositeView.extend({
+  childView: RepoView,
   childViewContainer: '.repo-list-container',
-  template: '#source-provider-template-authenticated',
+  template: function (serializedModel) {
+    var selector = serializedModel.isAuthenticated ? '#source-provider-template-authenticated' : '#source-provider-template-unauthenticated';
+    return _.template($(selector).html())(serializedModel);
+  },
   initialize: function () {
     this.collection = this.model.get('repoCollection');
   }
 });
 
-var UnauthenticatedSourceProviderView = Mn.ItemView.extend({
-  template:'#source-provider-template-unauthenticated'
-});
-
 var AppView = Mn.CollectionView.extend({
-  getChildView: function (sourceProvider) {
-    return sourceProvider.get('isAuthenticated') ? AuthenticatedSourceProviderView : UnauthenticatedSourceProviderView;
-  }
+  childView: SourceProviderView
 });
 
 var App = new Mn.Application();
@@ -72,6 +66,20 @@ App.addInitializer(function (data) {
   var sourceProviderCollection = marshalSourceProviderCollection(data);
   var appView = new AppView({collection: sourceProviderCollection});
   App.mainRegion.show(appView);
+});
+
+$(document).ready(function () {
+  var fakeData = [
+    {name: 'fake1', displayName: 'Fake Source 1', isAuthenticated: true, authEndpoint: 'fake1', iconURL: '/foo/bar/1', repoList: [
+      {id: 'repo1', name: 'Repo 1', sourceProviderName: 'fake1', active: false},
+      {id: 'repo2', name: 'Repo 2', sourceProviderName: 'fake2', active: true, services: [
+        {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service1', DISPLAY_NAME: 'Service 1', active: true},
+        {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service2', DISPLAY_NAME: 'Service 2', active: false},
+      ]},
+    ]},
+    {name: 'fake2', displayName: 'Fake Source 2', isAuthenticated: false, authEndpoint: 'fake2', iconURL: '/foo/bar/2'}
+  ];
+  App.start(fakeData);
 });
 
 function marshalSourceProviderCollection (data) {
@@ -95,19 +103,3 @@ function marshalRepoCollection (repoList) {
   });
   return new RepoCollection(repoModels);
 }
-
-$(document).ready(function () {
-  var fakeData = [
-    {name: 'fake1', displayName: 'Fake Source 1', isAuthenticated: true, authEndpoint: 'fake1', iconURL: '/foo/bar/1', repoList: [
-      {id: 'repo1', name: 'Repo 1', sourceProviderName: 'fake1', active: false},
-      {id: 'repo2', name: 'Repo 2', sourceProviderName: 'fake2', active: true, services: [
-        {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service1', DISPLAY_NAME: 'service1', active: true},
-        {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service2', DISPLAY_NAME: 'service2', active: false},
-      ]},
-    ]},
-    {name: 'fake2', displayName: 'Fake Source 2', isAuthenticated: false, authEndpoint: 'fake2', iconURL: '/foo/bar/2'}
-  ];
-  App.start(fakeData);
-});
-
-

@@ -65,9 +65,9 @@
 </script>
 
 <script type="text/template" id="service-template-active">
-  <a href="/services/deactivate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-deactivate">Dectivate <% DISPLAY_NAME %></a>
+  <a href="/services/deactivate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-deactivate">Dectivate <%= DISPLAY_NAME %></a>
 </script>
 
 <script type="text/template" id="service-template-inactive">
-  <a href="/services/activate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-activate">Activate <% DISPLAY_NAME %></a>
+  <a href="/services/activate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-activate">Activate <%= DISPLAY_NAME %></a>
 </script>
