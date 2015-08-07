@@ -1,4 +1,4 @@
-<template id="source-provider-template-unauthenticated">
+<script type="text/template" id="source-provider-template-unauthenticated">
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%= name %>">
         <h4 class="panel-title">
@@ -15,9 +15,9 @@
         </div>
       </div>
     </div>
-</template>
+</script>
 
-<template id="source-provider-template-authenticated">
+<script type="text/template" id="source-provider-template-authenticated">
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%= name %>">
         <h4 class="panel-title">
@@ -32,9 +32,9 @@
         </div>
       </div>
     </div>
-</template>
+</script>
 
-<template id="repo-template-active">
+<script type="text/template" id="repo-template-active">
   <div class="repoName row">
     <div class="col-sm-3"><span class="name"><%= name %></span></div>
     <div class="col-sm-9">
@@ -51,9 +51,9 @@
       <div class="services-container"></div>
     </div>
   </div>
-</template>
+</script>
 
-<template id="repo-template-inactive">
+<script type="text/template" id="repo-template-inactive">
   <div class="repoName row">
     <div class="col-sm-3"><span class="name"><%= name %></span></div>
     <div class="col-sm-9">
@@ -62,12 +62,12 @@
       <span class="label label-default activate"><span class="fa fa-plus"></span>&nbsp;&nbsp;Activate</span></a>
     </div>
   </div>
-</template>
+</script>
 
-<template id="service-template-active">
+<script type="text/template" id="service-template-active">
   <a href="/services/deactivate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-deactivate">Dectivate <% DISPLAY_NAME %></a>
-</template>
+</script>
 
-<template id="service-template-inactive">
+<script type="text/template" id="service-template-inactive">
   <a href="/services/activate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-activate">Activate <% DISPLAY_NAME %></a>
-</template>
+</script>

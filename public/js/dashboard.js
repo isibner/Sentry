@@ -80,6 +80,7 @@ function marshalSourceProviderCollection (data) {
     if (sourceProviderObject.isAuthenticated) {
       sourceProviderModel.set('repoCollection', marshalRepoCollection(sourceProviderObject.repoList));
     }
+    return sourceProviderModel;
   });
   return new SourceProviderCollection(sourceProviderModels);
 }
@@ -90,20 +91,21 @@ function marshalRepoCollection (repoList) {
     if (repoObject.active) {
       repoModel.set('serviceCollection', new ServiceCollection(repoObject.services));
     }
-    return new RepoCollection(repoModels);
-  })
+    return repoModel;
+  });
+  return new RepoCollection(repoModels);
 }
 
 $(document).ready(function () {
   var fakeData = [
-    {name: 'fake1', displayName: 'Fake Source 1', isAuthenticated: true, repoList: [
+    {name: 'fake1', displayName: 'Fake Source 1', isAuthenticated: true, authEndpoint: 'fake1', iconURL: '/foo/bar/1', repoList: [
       {id: 'repo1', name: 'Repo 1', sourceProviderName: 'fake1', active: false},
       {id: 'repo2', name: 'Repo 2', sourceProviderName: 'fake2', active: true, services: [
         {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service1', DISPLAY_NAME: 'service1', active: true},
         {sourceProviderName: 'fake2', id: 'repo2', NAME: 'service2', DISPLAY_NAME: 'service2', active: false},
       ]},
     ]},
-    {name: 'fake2', displayName: 'Fake Source 2', isAuthenticated: false}
+    {name: 'fake2', displayName: 'Fake Source 2', isAuthenticated: false, authEndpoint: 'fake2', iconURL: '/foo/bar/2'}
   ];
   App.start(fakeData);
 });
