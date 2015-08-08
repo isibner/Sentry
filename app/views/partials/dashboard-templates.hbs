@@ -39,8 +39,8 @@
     <div class="col-sm-3"><span class="name"><%= name %></span></div>
     <div class="col-sm-9">
       <span class="label label-success">Active</span>
-      <a href="/repos/deactivate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>">
-        <span class="label label-default deactivate"><span class="fa fa-warning"></span>&nbsp;&nbsp;Deactivate</span>
+      <a href="javascript:void(0)">
+        <span class="label label-default deactivate-repo"><span class="fa fa-warning"></span>&nbsp;&nbsp;Deactivate</span>
       </a>
     </div>
   </div>
@@ -58,16 +58,16 @@
     <div class="col-sm-3"><span class="name"><%= name %></span></div>
     <div class="col-sm-9">
       <span class="label label-danger">Not active</span>
-      <a href="/repos/activate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>">
-      <span class="label label-default activate"><span class="fa fa-plus"></span>&nbsp;&nbsp;Activate</span></a>
+      <a href="javascript:void(0)">
+      <span class="label label-default activate-repo"><span class="fa fa-plus"></span>&nbsp;&nbsp;Activate</span></a>
     </div>
   </div>
 </script>
 
 <script type="text/template" id="service-template-active">
-  <a href="/services/deactivate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-deactivate">Dectivate <%= DISPLAY_NAME %></a>
+  <a href="javascript:void(0)" class="btn btn-default btn-primary deactivate-service">Dectivate <%= DISPLAY_NAME %></a>
 </script>
 
 <script type="text/template" id="service-template-inactive">
-  <a href="/services/activate/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>/<%= encodeURIComponent(NAME) %>" class="btn btn-default btn-primary btn-activate">Activate <%= DISPLAY_NAME %></a>
+  <a href="javascript:void(0)" class="btn btn-default btn-primary activate-service">Activate <%= DISPLAY_NAME %></a>
 </script>

@@ -31,8 +31,15 @@ module.exports = (dependencies) ->
       handlebars: handlebars
       layoutsDir: path.join(APP_ROOT, 'views', 'layouts')
       partialsDir: path.join(APP_ROOT, 'views', 'partials')
+      # coffeelint: disable=missing_fat_arrows
       helpers:
         toJSON: (obj) -> JSON.stringify(obj, null, '  ')
+        section: (name, options) ->
+          @_sections ?= {}
+          @_sections[name] = options.fn(@)
+          return null
+        renderSection: (name) -> if @_sections?[name]? then new handlebars.SafeString(@_sections[name]) else ''
+        # coffeelint: enable=missing_fat_arrows
     )
     app.set 'view engine', '.hbs'
     app.set 'port', process.env.PORT || 3000
