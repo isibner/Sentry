@@ -9,13 +9,13 @@ module.exports = (dependencies) ->
       ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} is already active.") if activeRepo?
-      callback null
+        callback null
 
     checkRepoActive = ({repoId, sourceProviderName, userId}) -> (callback) ->
       ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} repo is not active.") if not activeRepo?
-      callback null
+        callback null
 
     getSourceProviderSync = (sourceProviderName) -> _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
 
