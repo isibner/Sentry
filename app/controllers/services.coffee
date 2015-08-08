@@ -17,8 +17,7 @@ module.exports = (dependencies) ->
         req.activeRepo = activeRepo
         next()
 
-    # TODO change to pOSt for ajax goodness
-    router.get '/activate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
+    router.post '/activate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       activeRepo = req.activeRepo
       {sourceProviderName, serviceName} = req.params
       if _.contains(activeRepo.activeServices, serviceName)
@@ -36,7 +35,7 @@ module.exports = (dependencies) ->
             return sendErr(res, queueProcessError) if queueProcessError?
             res.send({success: successMessage || 'Successfully activated service.'})
 
-    router.get '/deactivate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
+    router.post '/deactivate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       activeRepo = req.activeRepo
       {sourceProviderName, serviceName} = req.params
       if not _.contains(activeRepo.activeServices, serviceName)

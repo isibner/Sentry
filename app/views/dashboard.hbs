@@ -1,3 +1,11 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/static/css/font-awesome.min.css">
+<!-- Sweet Alert -->
+<link rel="stylesheet" href="/static/css/sweet-alert.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{{/section}}
+
+{{> dashboard-templates }}
 <div class="container">
   <div class="row">
     <h1>Welcome {{user.username}}</h1>
@@ -5,63 +13,19 @@
   </div>
   <div class="row">
   <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-    {{#each sourceProviderData}}
-    <div class="panel panel-default">
-      <div class="panel-heading" role="tab" id="heading{{@index}}">
-        <h4 class="panel-title">
-          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{@index}}" aria-expanded="true" aria-controls="collapse{{@index}}">
-            <h3>{{displayName}}</h3>
-          </a>
-        </h4>
-      </div>
-      <div id="collapse{{@index}}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{@index}}">
-        <div class="panel-body">
-          {{#if isAuthenticated}}
-            {{#each repoList}}
-              <div class="repoName row">
-                <div class="col-sm-3">
-                <span class="name">{{name}}</span>
-                </div>
-                <div class="col-sm-9">
-                  {{#if active}}
-                  <span class="label label-success">Active</span>
-                  <a href="/repos/deactivate/{{encodeUri sourceProviderName}}/{{encodeUri id}}"><span class="label label-default deactivate">
-                      <span class="fa fa-warning"></span>&nbsp;&nbsp;Deactivate
-                  </span></a>
-                  &nbsp;<a class="configure" href="/configureRepo/{{encodeUri sourceProviderName}}/{{encodeUri id}}">Configure</a>
-                  {{else}}
-                  <span class="label label-danger">Not active</span>
-                  <a href="/repos/activate/{{encodeUri sourceProviderName}}/{{encodeUri id}}"><span class="label label-default deactivate">
-                     <span class="fa fa-plus"></span>&nbsp;&nbsp;Activate
-                   </span></a>
-                  {{/if}}
-                </div>
-              </div>
-              {{#if active}}
-                <div class="col-sm-12">
-                <div class="well well-sm">
-                  <h4>Services</h4>
-                    {{#each services}}
-                      {{#if active}}
-                        {{!-- handlebars scoping is realllly dumb --}}
-                        <a href="/services/deactivate/{{encodeUri ../../sourceProviderName}}/{{encodeUri ../../id}}/{{encodeUri NAME}}" class="btn btn-default btn-primary btn-deactivate">Dectivate {{DISPLAY_NAME}}</a>
-                      {{else}}
-                        <a href="/services/activate/{{encodeUri ../../sourceProviderName}}/{{encodeUri ../../id}}/{{encodeUri NAME}}" class="btn btn-default btn-primary btn-activate">Activate {{DISPLAY_NAME}}</a>
-                      {{/if}}
-                    {{/each}}
-                </div>
-                </div>
-              {{/if}}
-            {{/each}}
-          {{else}}
-            <a href="{{authEndpoint}}" class="btn btn-lg btn-social btn-github">
-              <img class="repo-icon" src="{{iconURL}}">Authenticate
-            </a>
-          {{/if}}
-        </div>
-      </div>
+    <div class="text-center">
+      <span class="fa fa-cog fa-spin fa-5x"></span>
+      <br/>
+      <span class="fa fa-5x">Loading repos...</span>
     </div>
-    {{/each}}
   </div>
   </div>
 </div>
+
+{{#section 'scripts'}}
+<script src="/static/js/sweet-alert.min.js"></script>
+<script src="/static/js/lodash.min.js"></script>
+<script src="/static/js/backbone.min.js"></script>
+<script src="/static/js/marionette.min.js"></script>
+<script src="/static/js/dashboard.js"></script>
+{{/section}}

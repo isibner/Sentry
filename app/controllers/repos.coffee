@@ -1,5 +1,5 @@
 module.exports = (dependencies) ->
-  {packages: {express, path, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}, config} = dependencies
+  {packages: {async, express, path, del, lodash: _}, middleware: {auth}, lib: {db, repoPathFor, cloneInto}, config} = dependencies
   ActiveRepo = db.model('ActiveRepo')
   router = express.Router()
   return ({app, initPlugins}) ->
@@ -9,13 +9,13 @@ module.exports = (dependencies) ->
       ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} is already active.") if activeRepo?
-      callback null
+        callback null
 
     checkRepoActive = ({repoId, sourceProviderName, userId}) -> (callback) ->
       ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} repo is not active.") if not activeRepo?
-      callback null
+        callback null
 
     getSourceProviderSync = (sourceProviderName) -> _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
 
@@ -24,8 +24,8 @@ module.exports = (dependencies) ->
       return callback(new Error "Source provider plugin named #{sourceProviderName} does not exist.") if not sourceProvider?
       callback null
 
-    activateRepo = ({userObject, sourceProviderName, repoId}) -> (callback) ->
-      getSourceProviderSync(sourceProviderName).activateRepo userObject, repoId, (err) -> callback(err)
+    activateRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, callback) ->
+      getSourceProviderSync(sourceProviderName).activateRepo userObject, repoId, (err) -> callback(err, activeRepoWithId)
 
     deactivateRepo = ({userObject, sourceProviderName, repoId}) -> (callback) ->
       getSourceProviderSync(sourceProviderName).deactivateRepo userObject, repoId, (err) -> callback(err)
@@ -34,17 +34,17 @@ module.exports = (dependencies) ->
       newActiveRepo = new ActiveRepo {repoId, sourceProviderName, userId}
       newActiveRepo.save callback
 
-    removeRepoFromDatabase = ({userObject, sourceProviderName, repoId}) -> (callback) ->
-      ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, callback
+    removeRepoFromDatabase = ({userId, sourceProviderName, repoId}) -> (callback) ->
+      ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, (err, removedRepo) -> callback(err, removedRepo)
 
-    cloneRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, callback) ->
+    cloneRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, numAffected, callback) ->
       sourceProvider = getSourceProviderSync(sourceProviderName)
       repoPath = repoPathFor activeRepoWithId
-      cloneUrl = sourceProvider.cloneUrl(req.user, activeRepoWithId)
+      cloneUrl = sourceProvider.cloneUrl(userObject, activeRepoWithId)
       sshKeypath = config[sourceProviderName]?.SSH_KEYPATH
       gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
       console.log ("preparing to clone #{repoId} with command: " + gitCommand)
-      cloneInto {repoPath, cloneUrl, gitCommand}, (err) -> callback(err)
+      cloneInto {repoPath, cloneUrl, gitCommand}, (err) -> callback(err, activeRepoWithId)
 
     deleteRepoFiles = (removedRepo, callback) ->
       repoPath = repoPathFor removedRepo
@@ -54,8 +54,7 @@ module.exports = (dependencies) ->
       return res.send({error: err.message}) if err?
       res.send {success}
 
-    # TODO change to PUT and do some AJAX
-    router.get '/activate/:sourceProviderName/:repoId', (req, res) ->
+    router.post '/activate/:sourceProviderName/:repoId', (req, res) ->
       req.setTimeout(5 * 60 * 1000)
       {sourceProviderName, repoId} = req.params
       userId = req.user._id
@@ -67,9 +66,20 @@ module.exports = (dependencies) ->
         addRepoToDatabase(contextObject),
         cloneRepo(contextObject),
         activateRepo(contextObject)
-      ], finishRequest(res, 'Successfully activated repository.')
+      ], (err, activeRepoWithId) ->
+        return res.send({error: err.message}) if err?
+        # TODO this is used in dashboard.coffee too, it should be factored out
+        inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), activeRepoWithId.activeServices
+        serviceNameToObject = (active) -> (serviceName) ->
+          rawService = _.findWhere initPlugins.services, {NAME: serviceName}
+          {NAME, DISPLAY_NAME, AUTH_ENDPOINT} = rawService
+          return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceProviderName, repoId, isAuthenticated: rawService.isAuthenticated()}
+        activeServicesAsObjects = _.map activeRepoWithId.activeServices, serviceNameToObject(true)
+        inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
+        services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
+        res.send {services, success: 'Successfully activated repository.'}
 
-    router.get '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->
+    router.post '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->
       {sourceProviderName, repoId} = req.params
       userId = req.user._id
       contextObject = {sourceProviderName, repoId, userId, userObject: req.user}
