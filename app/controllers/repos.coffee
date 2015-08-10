@@ -24,6 +24,14 @@ module.exports = (dependencies) ->
       return callback(new Error "Source provider plugin named #{sourceProviderName} does not exist.") if not sourceProvider?
       callback null
 
+    checkUserOwnsRepo = ({sourceProviderName, repoId, userObject}) -> (callback) ->
+      sourceProvider = getSourceProviderSync(sourceProviderName)
+      sourceProvider.getRepositoryListForUser userObject, (err, repos) ->
+        callback(err) if err?
+        if not _.findWhere(repos, {id: repoId})?
+          return callback(new Error "Repository #{repoId} does not exist, or you don't own it.")
+        callback null
+
     activateRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, callback) ->
       getSourceProviderSync(sourceProviderName).activateRepo userObject, repoId, (err) -> callback(err, activeRepoWithId)
 
@@ -62,6 +70,7 @@ module.exports = (dependencies) ->
 
       async.waterfall [
         checkSourceProviderExists(contextObject),
+        checkUserOwnsRepo(contextObject),
         checkRepoNotActive(contextObject),
         addRepoToDatabase(contextObject),
         cloneRepo(contextObject),
@@ -86,6 +95,7 @@ module.exports = (dependencies) ->
 
       async.waterfall [
         checkSourceProviderExists(contextObject),
+        checkUserOwnsRepo(contextObject),
         checkRepoActive(contextObject),
         deactivateRepo(contextObject),
         removeRepoFromDatabase(contextObject),

@@ -13,7 +13,9 @@ module.exports = (dependencies) ->
     extractActiveRepo = (req, res, next) ->
       ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.sourceProviderName, userId: req.user._id}, (err, activeRepo) ->
         return next(err) if err
-        return sendErr(res, 'That repo is not active.') if not activeRepo?
+        if not activeRepo?
+          res.status(404)
+          return sendErr(res, 'Repo not found. It may be inactive or nonexistent.')
         req.activeRepo = activeRepo
         next()
 
