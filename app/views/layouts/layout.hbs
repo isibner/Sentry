@@ -91,9 +91,16 @@
       z-index: 1;
     }
 
-    .content div.container:nth-of-type(1)  {
+    #headerwrap div.container:nth-of-type(1){
       padding-top: 75px;
     }
+    {{! TODO - Fix this by adding per-page CSS}}
+    {{#if isIndex}}
+    {{else}}
+    .content {
+      padding-top: 75px;
+    }
+    {{/if}}
 
     .configure-repo-form textarea {
       width: 100%;
@@ -104,7 +111,6 @@
 
     #alerts.alerts-index {
       position: absolute;
-      margin-top: 5px;
       left:0;
       right:0;
       margin-left:auto;
@@ -163,7 +169,7 @@
   </div>
 
   <div class="content">
-      <div id="alerts" class="container {{#if isIndex}}alerts-index{{/if}}">
+    <div id="alerts" class="container {{#if isIndex}}alerts-index{{/if}}">
       <div class="row">
       {{#if hasFlashes}}
         {{#each errorFlashes}}
@@ -174,7 +180,7 @@
         {{/each}}
       {{/if}}
       </div>
-      </div>
+    </div>
     {{{body}}}
   </div>
 
