@@ -9,8 +9,9 @@ module.exports = (dependencies) ->
       req.flash 'error', msg
       res.redirect '/dashboard'
 
-    router.post '/:pluginName/:repoId', (req, res, next) ->
-      ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err, activeRepo) ->
+    router.post '/:sourceProviderName/:repoId', (req, res, next) ->
+      {repoId, sourceProviderName} = req.params
+      ActiveRepo.findOne {repoId, sourceProviderName, userId: req.user._id}, (err, activeRepo) ->
         flashErrorToDashboard(req, res, err.message) if err
         flashErrorToDashboard(req, res, 'That repo is not active!') if not activeRepo?
         try
@@ -25,8 +26,9 @@ module.exports = (dependencies) ->
           req.flash 'success', 'Config updated'
           res.redirect '/dashboard'
 
-    router.get '/:pluginName/:repoId', (req, res) ->
-      ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err, activeRepo) ->
+    router.get '/:sourceProviderName/:repoId', (req, res) ->
+      {repoId, sourceProviderName} = req.params
+      ActiveRepo.findOne {repoId, sourceProviderName, userId: req.user._id}, (err, activeRepo) ->
         flashErrorToDashboard(req, res, err.message) if err
         flashErrorToDashboard(req, res, 'That repo is not active!') if not activeRepo?
         res.render 'configureRepo', {configString: JSON.stringify(activeRepo.configObject, null, 2)}
