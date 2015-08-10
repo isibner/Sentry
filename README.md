@@ -13,7 +13,7 @@ The initial inspiration from Sentry came from lessons learned while building [To
 
 Sentry solves these problems by providing a plugin API. **Source provider plugins** are used to represent remote Git sources: GitHub is supported (in public and private flavors), and BitBucket/GitLab support are coming soon. **Service plugins** represent ways to process code received from a source provider, and can be reused across many different Git sources. The Sentry app acts as an intermediate layer between source providers and services, listening to the source providers and running the active services for each repo when the data changes.
 
-![Sentry architecture.](https://docs.google.com/drawings/d/1T4fILw5CzybzsWGTqvf85UDYSr69ShZOT4TGyaQYMnQ/pub?w=720&h=540)
+![Sentry architecture diagram](https://docs.google.com/drawings/d/1T4fILw5CzybzsWGTqvf85UDYSr69ShZOT4TGyaQYMnQ/pub?w=720&h=540)
 
 ### Quick Start
 

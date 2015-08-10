@@ -13,7 +13,6 @@ module.exports = (dependencies) ->
       ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.pluginName, userId: req.user._id}, (err, activeRepo) ->
         flashErrorToDashboard(req, res, err.message) if err
         flashErrorToDashboard(req, res, 'That repo is not active!') if not activeRepo?
-        console.log req.body.configString
         try
           activeRepo.configObject = JSON.parse(req.body.configString)
         catch parseError

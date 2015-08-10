@@ -11,11 +11,11 @@ module.exports = (dependencies) ->
         serviceName = serviceToInitialize.NAME
         getMatchingFiles {repoPath, serviceName, configObject}, (err, files) ->
           return callback(err) if err?
-          serviceToInitialize.handleInitialRepoData {files, repoPath, repoModel: repo}, callback
+          serviceToInitialize.handleInitialRepoData {files, repoPath, repoModel: repo, repoConfig: configObject?[serviceName]}, callback
       else
         async.each activeServices, ((serviceName, eachCallback) ->
           service = _.findWhere services, {NAME: serviceName}
           getMatchingFiles {repoPath, serviceName, configObject}, (err, files) ->
             return eachCallback(err) if err
-            service.handleHookRepoData {files, repoPath, repoModel: repo}, eachCallback
+            service.handleHookRepoData {files, repoPath, repoModel: repo, repoConfig: configObject?[serviceName]}, eachCallback
         ), callback

@@ -2,34 +2,32 @@
 
 # Source providers must extend Events.EventEmitter in order to emit 'hook' events when source provider repositories are changed.
 class ExampleSourceProvider extends require('events').EventEmitter
+  ###############################
+  #~~~~~~~~~ CONSTANTS ~~~~~~~~~#
+  ###############################
+  # Constants should be defined on the class itself.
+
+  # The name of your source provider, in kebab-case.
+  @NAME = 'your_internal_source_provider_name'
+
+  # The header that the user will see the repos from this source listed under.
+  @DISPLAY_NAME = 'Your Source Provider Display Name'
+
+  # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
+  @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
+
+  # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
+  # This endpoint *must* be registered in initializeAuthEndpoints().
+  # This can be null if this service provider expects to be manually configured; in this case,
+  # isAuthenticated() should always return true.
+  @AUTH_ENDPOINT = '/auth'
 
   # Construct a new ExampleSourceProvider.
   # @param {Object} options The options hash for this object.
-  # @param {Object} options.config The configuration object for this instance of Sentry.
-  #   This includes server config, plugins config, and any other config files you add.
-  #   If your source provider has a user config file, it will be passed as `config[@NAME]`, where @NAME
-  #   is the internal name of this class (specified below).
-  # @param {Object} packages The packages for the parent Sentry server, such as Lodash and Mongoose.
+  #   options.config The configuration object for this source provider.
+  #     Users specify this configuration in `plugins/#{NAME}` in their Sentry instance.
+  #   options.packages The packages for the parent Sentry server, such as Lodash and Mongoose.
   constructor: ({@config, @packages}) ->
-    ###############################
-    #~~~~~~~~~ CONSTANTS ~~~~~~~~~#
-    ###############################
-    # Constants should be defined on the class instance in the constructor.
-
-    # The name of your source provider, in kebab-case.
-    @NAME = 'your_internal_source_provider_name'
-
-    # The header that the user will see the repos from this source listed under.
-    @DISPLAY_NAME = 'Your Source Provider Display Name'
-
-    # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
-    @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
-
-    # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
-    # This endpoint *must* be registered in initializeAuthEndpoints().
-    # This can be null if this service provider expects to be manually configured; in this case,
-    # isAuthenticated() should always return true.
-    @AUTH_ENDPOINT = '/auth'
 
   # Initialize the required auth endpoints for this source provider, mounted at /plugins/source-providers/{@NAME}.
   # NB: req.user is a Mongoose model. If your auth returns an access token or other identifier, it may be a good idea

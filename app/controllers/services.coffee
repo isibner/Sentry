@@ -25,7 +25,8 @@ module.exports = (dependencies) ->
       if _.contains(activeRepo.activeServices, serviceName)
         return sendErr(res, new Error('Service already active.'))
       service = _.findWhere initPlugins.services, {NAME: serviceName}
-      service.activateServiceForRepo activeRepo, (activateServiceError, successMessage) ->
+      activationOptions = {repoModel: activeRepo, repoConfig: activeRepo.configObject?[serviceName]}
+      service.activateServiceForRepo activationOptions, (activateServiceError, successMessage) ->
         return sendErr(res, activateServiceError) if activateServiceError?
         activeRepo.activeServices.push serviceName
         activeRepo.markModified 'activeServices'
@@ -43,7 +44,8 @@ module.exports = (dependencies) ->
       if not _.contains(activeRepo.activeServices, serviceName)
         return sendErr(res, new Error("Could not deactivate #{service.DISPLAY_NAME} - it was not active."))
       service = _.findWhere initPlugins.services, {NAME: serviceName}
-      service.deactivateServiceForRepo activeRepo, (deactivateServiceError, successMessage) ->
+      deactivationOptions = {repoModel: activeRepo, repoConfig: activeRepo.configObject?[serviceName]}
+      service.deactivateServiceForRepo deactivationOptions, (deactivateServiceError, successMessage) ->
         return sendErr(res, deactivateServiceError) if deactivateServiceError?
         activeRepo.activeServices = _.without activeRepo.activeServices, serviceName
         activeRepo.markModified 'activeServices'
