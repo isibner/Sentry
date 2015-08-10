@@ -85,7 +85,13 @@ module.exports = (dependencies) ->
           return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceProviderName, repoId, isAuthenticated: rawService.isAuthenticated()}
         activeServicesAsObjects = _.map activeRepoWithId.activeServices, serviceNameToObject(true)
         inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
-        services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
+        # services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
+        services = _(activeServicesAsObjects.concat(inactiveServicesAsObjects))
+          .filter(({WORKS_WITH_PROVIDERS}) ->
+            return not WORKS_WITH_PROVIDERS? or _.contains WORKS_WITH_PROVIDERS, sourceProviderName
+          )
+          .sortByOrder(['DISPLAY_NAME'], ['asc'])
+          .value()
         res.send {services, success: 'Successfully activated repository.'}
 
     router.post '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->

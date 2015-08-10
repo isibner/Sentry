@@ -32,11 +32,17 @@ module.exports = (dependencies) ->
             inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), repoObject.activeServices
             serviceNameToObject = (active) -> (serviceName) ->
               rawService = _.findWhere initPlugins.services, {NAME: serviceName}
-              {NAME, DISPLAY_NAME, AUTH_ENDPOINT} = rawService
-              return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, isAuthenticated: rawService.isAuthenticated(), sourceProviderName: sourceProvider.name, repoId: repoObject.id}
+              {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_PROVIDERS} = rawService
+              return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_PROVIDERS, active, isAuthenticated: rawService.isAuthenticated(), sourceProviderName: sourceProvider.name, repoId: repoObject.id}
             activeServicesAsObjects = _.map repoObject.activeServices, serviceNameToObject(true)
             inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
-            repoObject.services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
+            repoObject.services = _(activeServicesAsObjects.concat(inactiveServicesAsObjects))
+              .filter(({sourceProviderName, WORKS_WITH_PROVIDERS}) ->
+                return not WORKS_WITH_PROVIDERS? or _.contains WORKS_WITH_PROVIDERS, sourceProviderName
+              )
+              .sortByOrder(['DISPLAY_NAME'], ['asc'])
+              .value()
+
         res.status(200).send(mapData)
 
 

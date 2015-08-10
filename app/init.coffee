@@ -17,12 +17,10 @@ module.exports = (dependencies) ->
     serverConfig = config.server
     initPlugins.sourceProviders = _.map sourceProviders, (Provider) ->
       instance = new Provider {serverConfig, packages, config: config[Provider.NAME]}
-      {NAME, DISPLAY_NAME, ICON_FILE_PATH, AUTH_ENDPOINT} = Provider
-      return _.extend instance, {NAME, DISPLAY_NAME, ICON_FILE_PATH, AUTH_ENDPOINT}
+      return _.extend instance, Provider
     initPlugins.services = _.map services, (Service) ->
       instance = new Service {db, packages, serverConfig, config: config[Service.NAME], sourceProviders: initPlugins.sourceProviders}
-      {NAME, DISPLAY_NAME, ICON_FILE_PATH, AUTH_ENDPOINT} = Service
-      return _.extend instance, {NAME, DISPLAY_NAME, ICON_FILE_PATH, AUTH_ENDPOINT}
+      return _.extend instance, Service
 
     # See https://github.com/expressjs/body-parser/issues/100
     app.use (req, res, next) ->
