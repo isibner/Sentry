@@ -16,7 +16,7 @@ class ExampleService
     ###############################
     #~~~~~~~~~ CONSTANTS ~~~~~~~~~#
     ###############################
-    # Constants shoudl be defined on the class instance in the constructor.
+    # Constants should be defined on the class instance in the constructor.
 
     # The name of your service, in kebab-case.
     @NAME = 'your_internal_service_name'
