@@ -27,3 +27,6 @@ if you want to use [handlebars](https://github.com/wycats/handlebars.js) or [pas
 these should go in `peerDependencies` so you get the same instance as Sentry.
 * If you're publishing to NPM, the keywords for your package should include `"sentry"`, `"source"`, and your source's name.
 
+### icon.png
+
+A square icon that Sentry will use to display your source in the UI. 128x128 is a good size.
