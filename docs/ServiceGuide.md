@@ -37,6 +37,6 @@ This is what your NPM module exposes - a class representing your Sentry service.
 
 It is **highly recommended**, though not required, that you implement this class in CoffeeScript, then compile it into a `.js`
 file. An annotated template, which specifies all required methods and their parameters, can be found in 
-[`ExampleService.coffee`](./ExampleService.coffee). The best way to write a simple source is to copy this 
+[`ServiceTemplate.coffee`](./ServiceTemplate.coffee). The best way to write a simple source is to copy this 
 template into your own project and fill in the method stubs. You can also check [the list of existing services](https://github.com/isibner/Sentry/#services)
 for working examples.

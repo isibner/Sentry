@@ -1,40 +1,40 @@
-# Template for a Sentry source provider.
+# Template for a Sentry source.
 
-# Source providers must extend Events.EventEmitter in order to emit 'hook' events when source provider repositories are changed.
-class ExampleSourceProvider extends require('events').EventEmitter
+# Sources must extend Events.EventEmitter in order to emit 'hook' events when source repositories are changed.
+class ExampleSource extends require('events').EventEmitter
   ###############################
   #          CONSTANTS          #
   ###############################
   # Constants should be defined on the class itself.
 
-  # The name of your source provider, in kebab-case.
-  @NAME = 'your-internal-source-provider-name'
+  # The name of your source, in kebab-case.
+  @NAME = 'your-internal-source-name'
 
   # The header that the user will see the repos from this source listed under.
-  @DISPLAY_NAME = 'Your Source Provider Display Name'
+  @DISPLAY_NAME = 'Your Source Display Name'
 
-  # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
+  # The icon file for this source, as an absolute path - or `null` if there's no icon.
   @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
 
   ###
-  The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
+  The initial endpoint to hit in order to authenticate this source, relative to '/plugins/source-providers/{@NAME}'.
   This endpoint *must* be registered in initializeAuthEndpoints().
-  This can be null if this service provider expects to be manually configured; in this case,
+  This can be null if this source expects to be manually configured; in this case,
   isAuthenticated() must always return true.
   ###
   @AUTH_ENDPOINT = '/auth'
 
   ###
-  Construct a new ExampleSourceProvider.
+  Construct a new ExampleSource.
   @param {Object} options The options hash for this object.
-    options.config The configuration object for this source provider.
+    options.config The configuration object for this source.
       Users specify this configuration in `plugins/#{NAME}` in their Sentry instance.
     options.packages The packages for the parent Sentry server, such as Lodash and Mongoose.
   ###
   constructor: ({@config, @packages}) ->
 
   ###
-  Initialize the required auth endpoints for this source provider, mounted at /plugins/source-providers/{@NAME}.
+  Initialize the required auth endpoints for this source, mounted at /plugins/source-providers/{@NAME}.
   NB: req.user is a Mongoose model. If your auth returns an access token or other identifier, it may be a good idea
   to save this token as key on `req.user.pluginData[@NAME]`. Note also that you must use `req.user.markModified('pluginData')`,
   or the model will save incorrectly.
@@ -43,7 +43,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
   initializeAuthEndpoints: (router) ->
 
   ###
-  Is the given request authenticated for this source provider?
+  Is the given request authenticated for this source?
   @param {Object} req The request object that may or may not be authenticated.
     req.user will be the Mongoose model for the user.
   @return {Boolean} true, if the request is authenticated.
@@ -57,13 +57,13 @@ class ExampleSourceProvider extends require('events').EventEmitter
     Results should have type {Array<Object>}, representing info about the repos.
     Each object must have an `id` field, which MUST be a globally unique identifier for the repo, and a `name` field,
     which will be used for display. The object will be passed directly to services registered on the repo,
-    so you can also add other fields to be used by specialized services when dealing with this SourceProvider.
+    so you can also add other fields to be used by specialized services when dealing with this source.
   ###
   getRepositoryListForUser: (user, callback) ->
 
   ###
   Activate a given repository for the user. Only called if the requesting user is authenticated.
-  If you plan to listen for webhooks, ensure that you have added themto your git service when you activate the repo.
+  If you plan to listen for webhooks, ensure that you have added them to your git service when you activate the repo.
   @param {Object} user The Mongoose model for the user
   @param {String} repoId The unique ID for this repository (from getRepositoryListForUser)
   @param {Function} callback Node-style callback with one argument: (err). Err should be null or
@@ -78,7 +78,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
 
   In order to signal a change, you must trigger the 'hook' event with a data object that contains the repoId for this hook
   under the `repoId` key - e.g. `@emit 'hook', {repoId: req.body.repository.full_name}`
-  The object will be passed to services handling hooks for your source provider; you add any other fields you like to the data
+  The object will be passed to services handling hooks for your source; you add any other fields you like to the data
   object in order to pass relevant information to services specialized for this git source.
   @param {Object} router The express router for any webhooks, which will be mounted at /plugins/source-providers/{@NAME}
   ###
