@@ -8,7 +8,7 @@ gulp.task 'lint:coffee', ->
     .pipe(do coffeelint.reporter)
 
 gulp.task 'lint:cslint', ['lint:coffee'], ->
-  gulp.src(['{app, config, lib, test}/**/*.coffee', '*.coffee', '!{Service,SourceProvider}Template.coffee'])
+  gulp.src(['{app, config, lib, test}/**/*.coffee', '*.coffee', '!{Service,Source}Template.coffee'])
     .pipe(do cslint)
     .pipe(do cslint.format)
 

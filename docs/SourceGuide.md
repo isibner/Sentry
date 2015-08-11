@@ -4,7 +4,7 @@ By writing a Sentry source, you can integrate your favorite Git source with Sent
 when it's on a privately-hosted Git services like Stash. If your service of choice supports OAuth, your source
 can use that to authenticate.
 
-At its core, a Sentry source is just an NPM module that exposes a source provider class. So all the normal rules of Node apply -
+At its core, a Sentry source is just an NPM module that exposes a source class. So all the normal rules of Node apply -
 you can have other modules as dependencies, make helper files, and so on. At a minimum though, a bare-bones sentry source needs
 three things: a `package.json` file, a source class (which will be the module's export), and an icon file.
 

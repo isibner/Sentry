@@ -1,8 +1,8 @@
-var SourceProviderModel = Backbone.Model.extend({
+var SourceModel = Backbone.Model.extend({
   idAttribute: 'name'
 });
-var SourceProviderCollection = Backbone.Collection.extend({
-  model: SourceProviderModel
+var SourceCollection = Backbone.Collection.extend({
+  model: SourceModel
 });
 
 var RepoModel = Backbone.Model.extend({
@@ -14,7 +14,7 @@ var RepoModel = Backbone.Model.extend({
     return '/repos/deactivate/' + this._URLSuffix();
   },
   _URLSuffix: function () {
-    return encodeURIComponent(this.get('sourceProviderName')) + '/' +
+    return encodeURIComponent(this.get('sourceName')) + '/' +
       encodeURIComponent(this.get('id'));
   }
 });
@@ -31,7 +31,7 @@ var ServiceModel = Backbone.Model.extend({
     return '/services/deactivate/' + this._URLSuffix();
   },
   _URLSuffix: function () {
-    return encodeURIComponent(this.get('sourceProviderName')) + '/' +
+    return encodeURIComponent(this.get('sourceName')) + '/' +
       encodeURIComponent(this.get('repoId')) + '/' +
       encodeURIComponent(this.get('NAME'));
   }
@@ -128,11 +128,11 @@ var RepoView = Mn.CompositeView.extend({
   }
 });
 
-var SourceProviderView = Mn.CompositeView.extend({
+var SourceView = Mn.CompositeView.extend({
   childView: RepoView,
   childViewContainer: '.repo-list-container',
   template: function (serializedModel) {
-    var selector = serializedModel.isAuthenticated ? '#source-provider-template-authenticated' : '#source-provider-template-unauthenticated';
+    var selector = serializedModel.isAuthenticated ? '#source-template-authenticated' : '#source-template-unauthenticated';
     return _.template($(selector).html())(serializedModel);
   },
   initialize: function () {
@@ -141,7 +141,7 @@ var SourceProviderView = Mn.CompositeView.extend({
 });
 
 var AppView = Mn.CollectionView.extend({
-  childView: SourceProviderView
+  childView: SourceView
 });
 
 var App = new Mn.Application();
@@ -151,8 +151,8 @@ App.addRegions({
 });
 
 App.addInitializer(function (data) {
-  var sourceProviderCollection = marshalSourceProviderCollection(data);
-  var appView = new AppView({collection: sourceProviderCollection});
+  var sourceCollection = marshalSourceCollection(data);
+  var appView = new AppView({collection: sourceCollection});
   App.mainRegion.show(appView);
 });
 
@@ -162,15 +162,15 @@ $(document).ready(function () {
   }).fail(handleAjaxError);
 });
 
-function marshalSourceProviderCollection (data) {
-  var sourceProviderModels = _.map(data, function (sourceProviderObject) {
-    var sourceProviderModel = new SourceProviderModel(sourceProviderObject);
-    if (sourceProviderObject.isAuthenticated) {
-      sourceProviderModel.set('repoCollection', marshalRepoCollection(sourceProviderObject.repoList));
+function marshalSourceCollection (data) {
+  var sourceModels = _.map(data, function (sourceObject) {
+    var sourceModel = new SourceModel(sourceObject);
+    if (sourceObject.isAuthenticated) {
+      sourceModel.set('repoCollection', marshalRepoCollection(sourceObject.repoList));
     }
-    return sourceProviderModel;
+    return sourceModel;
   });
-  return new SourceProviderCollection(sourceProviderModels);
+  return new SourceCollection(sourceModels);
 }
 
 function marshalRepoCollection (repoList) {

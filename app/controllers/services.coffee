@@ -11,7 +11,7 @@ module.exports = (dependencies) ->
       res.send {error}
 
     extractActiveRepo = (req, res, next) ->
-      ActiveRepo.findOne {repoId: req.params.repoId, sourceProviderName: req.params.sourceProviderName, userId: req.user._id}, (err, activeRepo) ->
+      ActiveRepo.findOne {repoId: req.params.repoId, sourceName: req.params.sourceName, userId: req.user._id}, (err, activeRepo) ->
         return next(err) if err
         if not activeRepo?
           res.status(404)
@@ -19,9 +19,9 @@ module.exports = (dependencies) ->
         req.activeRepo = activeRepo
         next()
 
-    router.post '/activate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
+    router.post '/activate/:sourceName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       activeRepo = req.activeRepo
-      {sourceProviderName, serviceName} = req.params
+      {sourceName, serviceName} = req.params
       if _.contains(activeRepo.activeServices, serviceName)
         return sendErr(res, new Error('Service already active.'))
       service = _.findWhere initPlugins.services, {NAME: serviceName}
@@ -38,9 +38,9 @@ module.exports = (dependencies) ->
             return sendErr(res, queueProcessError) if queueProcessError?
             res.send({success: successMessage || 'Successfully activated service.'})
 
-    router.post '/deactivate/:sourceProviderName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
+    router.post '/deactivate/:sourceName/:repoId/:serviceName', extractActiveRepo, (req, res, next) ->
       activeRepo = req.activeRepo
-      {sourceProviderName, serviceName} = req.params
+      {sourceName, serviceName} = req.params
       if not _.contains(activeRepo.activeServices, serviceName)
         return sendErr(res, new Error("Could not deactivate #{service.DISPLAY_NAME} - it was not active."))
       service = _.findWhere initPlugins.services, {NAME: serviceName}

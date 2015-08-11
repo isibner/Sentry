@@ -18,18 +18,18 @@ class ExampleService
   ###
   The initial endpoint to hit in order to authenticate this service, relative to '/plugins/services/{@NAME}'.
   This endpoint *must* be registered in initializeAuthEndpoints().
-  This can be null if this service provider expects to be manually configured; in this case,
+  This can be null if this service expects to be manually configured; in this case,
   isAuthenticated() should always return true.
   ###
   @AUTH_ENDPOINT = '/auth'
 
   ###
   [OPTIONAL]
-  The source providers that this service can work with, or `undefined` if the service can work with
-  any git source. The service will only be activated on repos that come from these providers.
+  The sources that this service can work with, or `undefined` if the service can work with
+  any git source. The service will only be activated on repos that come from these sources.
   Useful for plugins that need metadata in addition to the repo files to function correctly.
   ###
-  @WORKS_WITH_PROVIDERS: ['github', 'github-private']
+  @WORKS_WITH_SOURCES: ['github', 'github-private']
 
   ###
   Construct a new ExampleService.
@@ -38,10 +38,10 @@ class ExampleService
       Users specify this configuration in `plugins/#{NAME}` in their Sentry instance.
     options.packages The packages for the parent Sentry server, such as Lodash and Mongoose.
     options.db The Mongoose connection object used by Sentry. Register your models on this.
-    options.sourceProviders The initialized SourceProviders plugged into Sentry. Can be useful
+    options.sources The initialized Sources plugged into Sentry. Can be useful
       if this plugin requires authentication for some repository in order to work correctly.
   ###
-  constructor: ({@config, @packages, @db, @sourceProviders}) ->
+  constructor: ({@config, @packages, @db, @sources}) ->
 
   ###
   Is the given request authenticated for this service?
@@ -77,7 +77,7 @@ class ExampleService
   ###
   Activate this service for the given repository.
   @param {Object} options
-    options.repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+    options.repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceName`
       as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
       your service data.
     options.repoConfig The user-specified config for this repository. Should have the same format as the constructor's config.
@@ -86,14 +86,14 @@ class ExampleService
      `successMessage` is a String that will be flashed to the user if the activation was successful.
   ###
   activateServiceForRepo: ({repoModel, repoConfig}, callback) ->
-    {repoId, userId, sourceProviderName} = repoModel
+    {repoId, userId, sourceName} = repoModel
 
   ###
   Handle the initial data from this repository. Some services need to know about the initial state of the repo, and run
   different code on hooks; others may delegate `handleInitialRepoData` and `handleHookRepoData` to the same function.
   @param {Object} options
     options.files {Array<String>} A list of file paths to handle, relative to `repoPath`.
-    options.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+    options.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceName`
     as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
     your service data.
     options.repoPath {String} The path of the directory in which to find the file paths in the `files` array.
@@ -103,13 +103,13 @@ class ExampleService
   ###
 
   handleInitialRepoData: ({files, repoModel, repoPath, repoConfig}, callback) ->
-    {repoId, userId, sourceProviderName} = repoModel
+    {repoId, userId, sourceName} = repoModel
   ###
   Handle the data from a hook to this repository. Some services need to know about the initial state of the repo, and run
   different code on hooks; others may delegate `handleInitialRepoData` and `handleHookRepoData` to the same function.
   @param {Object} options
     options.files {Array<String>} A list of file paths to handle, relative to `repoPath`.
-    options.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+    options.repoModel {Object} The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceName`
     as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
     your service data.
     options.repoPath {String} The path of the directory in which to find the file paths in the `files` array.
@@ -118,12 +118,12 @@ class ExampleService
      `err` should contain an error, if one occurred during activation, or be null (or undefined) if no error occurred.
   ###
   handleHookRepoData: ({files, repoModel, repoPath, repoConfig}, callback) ->
-    {repoId, userId, sourceProviderName} = repoModel
+    {repoId, userId, sourceName} = repoModel
 
   ###
   Deactivate this service for the given repository.
   @param {Object} options
-    options.repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceProviderName`
+    options.repoModel The Mongoose model representing this repository. Has `repoId`, `userId`, and `sourceName`
       as fields. It's best not to add fields and bloat this model; prefer to create your own Mongoose model to represent
       your service data.
     options.repoConfig The user-specified config for this repository. Should have the same format as the constructor's config.
@@ -132,4 +132,4 @@ class ExampleService
      `successMessage` is a String that will be flashed to the user if the deactivation was successful.
   ###
   deactivateServiceForRepo: ({repoModel, repoConfig}, callback) ->
-    {repoId, userId, sourceProviderName} = repoModel
+    {repoId, userId, sourceName} = repoModel

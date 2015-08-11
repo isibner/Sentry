@@ -4,7 +4,7 @@ module.exports = (dependencies) ->
   ActiveRepoSchema = new mongoose.Schema {
     repoId: {type: String, required: true},
     userId: {type: ObjectId, required: true},
-    sourceProviderName: {type: String, required: true},
+    sourceName: {type: String, required: true},
     configObject: {type: Mixed},
     activeServices: {type: [String]}
   }

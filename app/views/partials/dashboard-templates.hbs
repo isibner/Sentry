@@ -1,4 +1,4 @@
-<script type="text/template" id="source-provider-template-unauthenticated">
+<script type="text/template" id="source-template-unauthenticated">
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%= name %>">
         <h4 class="panel-title">
@@ -17,7 +17,7 @@
     </div>
 </script>
 
-<script type="text/template" id="source-provider-template-authenticated">
+<script type="text/template" id="source-template-authenticated">
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%= name %>">
         <h4 class="panel-title">
@@ -42,7 +42,7 @@
       <a href="javascript:void(0)">
         <span class="label label-default deactivate-repo"><span class="fa fa-warning"></span>&nbsp;&nbsp;Deactivate</span>
       </a>
-      &nbsp;<a class="configure" href="/configureRepo/<%= encodeURIComponent(sourceProviderName) %>/<%= encodeURIComponent(id) %>">Configure</a>
+      &nbsp;<a class="configure" href="/configureRepo/<%= encodeURIComponent(sourceName) %>/<%= encodeURIComponent(id) %>">Configure</a>
     </div>
   </div>
   <!-- maybe a row goes here -->

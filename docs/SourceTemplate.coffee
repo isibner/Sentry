@@ -17,7 +17,7 @@ class ExampleSource extends require('events').EventEmitter
   @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
 
   ###
-  The initial endpoint to hit in order to authenticate this source, relative to '/plugins/source-providers/{@NAME}'.
+  The initial endpoint to hit in order to authenticate this source, relative to '/plugins/sources/{@NAME}'.
   This endpoint *must* be registered in initializeAuthEndpoints().
   This can be null if this source expects to be manually configured; in this case,
   isAuthenticated() must always return true.
@@ -34,11 +34,11 @@ class ExampleSource extends require('events').EventEmitter
   constructor: ({@config, @packages}) ->
 
   ###
-  Initialize the required auth endpoints for this source, mounted at /plugins/source-providers/{@NAME}.
+  Initialize the required auth endpoints for this source, mounted at /plugins/sources/{@NAME}.
   NB: req.user is a Mongoose model. If your auth returns an access token or other identifier, it may be a good idea
   to save this token as key on `req.user.pluginData[@NAME]`. Note also that you must use `req.user.markModified('pluginData')`,
   or the model will save incorrectly.
-  @param {Object} router The express router, which will be mounted at /plugins/source-providers/{@NAME}
+  @param {Object} router The express router, which will be mounted at /plugins/sources/{@NAME}
   ###
   initializeAuthEndpoints: (router) ->
 
@@ -73,14 +73,14 @@ class ExampleSource extends require('events').EventEmitter
 
   ###
   Initialize hooks that signal a change in source data for an activated repo. This will most often be a webhook endpoint.
-  You can register your hook handler on the router object, which will be mounted at '/plugins/source-providers/{@NAME}'.
+  You can register your hook handler on the router object, which will be mounted at '/plugins/sources/{@NAME}'.
   You can use something other than webhooks to trigger the change, like set up a cron job to trigger the services ever few minutes.
 
   In order to signal a change, you must trigger the 'hook' event with a data object that contains the repoId for this hook
   under the `repoId` key - e.g. `@emit 'hook', {repoId: req.body.repository.full_name}`
   The object will be passed to services handling hooks for your source; you add any other fields you like to the data
   object in order to pass relevant information to services specialized for this git source.
-  @param {Object} router The express router for any webhooks, which will be mounted at /plugins/source-providers/{@NAME}
+  @param {Object} router The express router for any webhooks, which will be mounted at /plugins/sources/{@NAME}
   ###
   initializeHooks: (router) ->
 

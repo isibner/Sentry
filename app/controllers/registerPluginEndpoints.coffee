@@ -1,16 +1,16 @@
 module.exports = (dependencies) ->
   {packages: {lodash: _, express}, middleware: {auth, getUserRepos}} = dependencies
   router = express.Router()
-  return ({app, initPlugins: {sourceProviders, services}}) ->
-    sourceProvidersRouter = express.Router()
-    _.forEach sourceProviders, (sourceProvider) ->
+  return ({app, initPlugins: {sources, services}}) ->
+    sourcesRouter = express.Router()
+    _.forEach sources, (source) ->
       pluginRouter = express.Router()
-      sourceProvider.initializeHooks(pluginRouter)
+      source.initializeHooks(pluginRouter)
       pluginRouter.use auth.ensureAuthenticated
-      sourceProvider.initializeAuthEndpoints(pluginRouter)
+      source.initializeAuthEndpoints(pluginRouter)
       pluginRouter.get '/icon', (req, res) ->
-        return res.sendFile sourceProvider.ICON_FILE_PATH
-      sourceProvidersRouter.use ('/' + sourceProvider.NAME), pluginRouter
+        return res.sendFile source.ICON_FILE_PATH
+      sourcesRouter.use ('/' + source.NAME), pluginRouter
 
     serviceRouter = express.Router()
     _.forEach services, (service) ->
@@ -28,7 +28,7 @@ module.exports = (dependencies) ->
         service.initializePublicEndpoints(pluginRouter)
         noAuthServiceRouter.use ('/' + service.NAME), pluginRouter
 
-    router.use '/source-providers', sourceProvidersRouter
+    router.use '/sources', sourcesRouter
     router.use '/services', noAuthServiceRouter
     router.use '/services', auth.ensureAuthenticated, serviceRouter
     app.use '/plugins', router

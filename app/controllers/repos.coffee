@@ -5,51 +5,51 @@ module.exports = (dependencies) ->
   return ({app, initPlugins}) ->
     router.use auth.ensureAuthenticated
 
-    checkRepoNotActive = ({repoId, sourceProviderName, userId}) -> (callback) ->
-      ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
+    checkRepoNotActive = ({repoId, sourceName, userId}) -> (callback) ->
+      ActiveRepo.findOne {repoId, sourceName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} is already active.") if activeRepo?
         callback null
 
-    checkRepoActive = ({repoId, sourceProviderName, userId}) -> (callback) ->
-      ActiveRepo.findOne {repoId, sourceProviderName, userId}, (err, activeRepo) ->
+    checkRepoActive = ({repoId, sourceName, userId}) -> (callback) ->
+      ActiveRepo.findOne {repoId, sourceName, userId}, (err, activeRepo) ->
         return callback(err) if err?
         return callback(new Error "Repo #{activeRepo.repoId} repo is not active.") if not activeRepo?
         callback null
 
-    getSourceProviderSync = (sourceProviderName) -> _.findWhere initPlugins.sourceProviders, {NAME: sourceProviderName}
+    getSourceSync = (sourceName) -> _.findWhere initPlugins.sources, {NAME: sourceName}
 
-    checkSourceProviderExists = ({sourceProviderName}) -> (callback) ->
-      sourceProvider = getSourceProviderSync(sourceProviderName)
-      return callback(new Error "Source provider plugin named #{sourceProviderName} does not exist.") if not sourceProvider?
+    checkSourceExists = ({sourceName}) -> (callback) ->
+      source = getSourceSync(sourceName)
+      return callback(new Error "Source plugin named #{sourceName} does not exist.") if not source?
       callback null
 
-    checkUserOwnsRepo = ({sourceProviderName, repoId, userObject}) -> (callback) ->
-      sourceProvider = getSourceProviderSync(sourceProviderName)
-      sourceProvider.getRepositoryListForUser userObject, (err, repos) ->
+    checkUserOwnsRepo = ({sourceName, repoId, userObject}) -> (callback) ->
+      source = getSourceSync(sourceName)
+      source.getRepositoryListForUser userObject, (err, repos) ->
         callback(err) if err?
         if not _.findWhere(repos, {id: repoId})?
           return callback(new Error "Repository #{repoId} does not exist, or you don't own it.")
         callback null
 
-    activateRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, callback) ->
-      getSourceProviderSync(sourceProviderName).activateRepo userObject, repoId, (err) -> callback(err, activeRepoWithId)
+    activateRepo = ({userObject, sourceName, repoId}) -> (activeRepoWithId, callback) ->
+      getSourceSync(sourceName).activateRepo userObject, repoId, (err) -> callback(err, activeRepoWithId)
 
-    deactivateRepo = ({userObject, sourceProviderName, repoId}) -> (callback) ->
-      getSourceProviderSync(sourceProviderName).deactivateRepo userObject, repoId, (err) -> callback(err)
+    deactivateRepo = ({userObject, sourceName, repoId}) -> (callback) ->
+      getSourceSync(sourceName).deactivateRepo userObject, repoId, (err) -> callback(err)
 
-    addRepoToDatabase = ({repoId, sourceProviderName, userId}) -> (callback) ->
-      newActiveRepo = new ActiveRepo {repoId, sourceProviderName, userId}
+    addRepoToDatabase = ({repoId, sourceName, userId}) -> (callback) ->
+      newActiveRepo = new ActiveRepo {repoId, sourceName, userId}
       newActiveRepo.save callback
 
-    removeRepoFromDatabase = ({userId, sourceProviderName, repoId}) -> (callback) ->
-      ActiveRepo.findOneAndRemove {repoId, sourceProviderName, userId}, (err, removedRepo) -> callback(err, removedRepo)
+    removeRepoFromDatabase = ({userId, sourceName, repoId}) -> (callback) ->
+      ActiveRepo.findOneAndRemove {repoId, sourceName, userId}, (err, removedRepo) -> callback(err, removedRepo)
 
-    cloneRepo = ({userObject, sourceProviderName, repoId}) -> (activeRepoWithId, numAffected, callback) ->
-      sourceProvider = getSourceProviderSync(sourceProviderName)
+    cloneRepo = ({userObject, sourceName, repoId}) -> (activeRepoWithId, numAffected, callback) ->
+      source = getSourceSync(sourceName)
       repoPath = repoPathFor activeRepoWithId
-      cloneUrl = sourceProvider.cloneUrl(userObject, activeRepoWithId)
-      sshKeypath = config[sourceProviderName]?.SSH_KEYPATH
+      cloneUrl = source.cloneUrl(userObject, activeRepoWithId)
+      sshKeypath = config[sourceName]?.SSH_KEYPATH
       gitCommand = if sshKeypath? then "sh #{path.join config.server.ROOT, 'scripts/git.sh'} -i #{sshKeypath}" else 'git'
       console.log ("preparing to clone #{repoId} with command: " + gitCommand)
       cloneInto {repoPath, cloneUrl, gitCommand}, (err) -> callback(err, activeRepoWithId)
@@ -62,14 +62,14 @@ module.exports = (dependencies) ->
       return res.send({error: err.message}) if err?
       res.send {success}
 
-    router.post '/activate/:sourceProviderName/:repoId', (req, res) ->
+    router.post '/activate/:sourceName/:repoId', (req, res) ->
       req.setTimeout(5 * 60 * 1000)
-      {sourceProviderName, repoId} = req.params
+      {sourceName, repoId} = req.params
       userId = req.user._id
-      contextObject = {sourceProviderName, repoId, userId, userObject: req.user}
+      contextObject = {sourceName, repoId, userId, userObject: req.user}
 
       async.waterfall [
-        checkSourceProviderExists(contextObject),
+        checkSourceExists(contextObject),
         checkUserOwnsRepo(contextObject),
         checkRepoNotActive(contextObject),
         addRepoToDatabase(contextObject),
@@ -82,25 +82,25 @@ module.exports = (dependencies) ->
         serviceNameToObject = (active) -> (serviceName) ->
           rawService = _.findWhere initPlugins.services, {NAME: serviceName}
           {NAME, DISPLAY_NAME, AUTH_ENDPOINT} = rawService
-          return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceProviderName, repoId, isAuthenticated: rawService.isAuthenticated()}
+          return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceName, repoId, isAuthenticated: rawService.isAuthenticated()}
         activeServicesAsObjects = _.map activeRepoWithId.activeServices, serviceNameToObject(true)
         inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
         # services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
         services = _(activeServicesAsObjects.concat(inactiveServicesAsObjects))
-          .filter(({WORKS_WITH_PROVIDERS}) ->
-            return not WORKS_WITH_PROVIDERS? or _.contains WORKS_WITH_PROVIDERS, sourceProviderName
+          .filter(({WORKS_WITH_SOURCES}) ->
+            return not WORKS_WITH_SOURCES? or _.contains WORKS_WITH_SOURCES, sourceName
           )
           .sortByOrder(['DISPLAY_NAME'], ['asc'])
           .value()
         res.send {services, success: 'Successfully activated repository.'}
 
-    router.post '/deactivate/:sourceProviderName/:repoId', (req, res, next) ->
-      {sourceProviderName, repoId} = req.params
+    router.post '/deactivate/:sourceName/:repoId', (req, res, next) ->
+      {sourceName, repoId} = req.params
       userId = req.user._id
-      contextObject = {sourceProviderName, repoId, userId, userObject: req.user}
+      contextObject = {sourceName, repoId, userId, userObject: req.user}
 
       async.waterfall [
-        checkSourceProviderExists(contextObject),
+        checkSourceExists(contextObject),
         checkUserOwnsRepo(contextObject),
         checkRepoActive(contextObject),
         deactivateRepo(contextObject),

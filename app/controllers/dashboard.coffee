@@ -8,37 +8,37 @@ module.exports = (dependencies) ->
     router.get '/', (req, res) -> res.render 'dashboard'
 
     router.get '/data', (req, res) ->
-      async.map initPlugins.sourceProviders, ((sourceProvider, callback) ->
+      async.map initPlugins.sources, ((source, callback) ->
         data =
-          name: sourceProvider.NAME
-          displayName: sourceProvider.DISPLAY_NAME
-          isAuthenticated: sourceProvider.isAuthenticated(req)
-          authEndpoint: "/plugins/source-providers/#{sourceProvider.NAME}/" + _.trimLeft(sourceProvider.AUTH_ENDPOINT, '/')
-          iconURL: "/plugins/source-providers/#{sourceProvider.NAME}/icon"
+          name: source.NAME
+          displayName: source.DISPLAY_NAME
+          isAuthenticated: source.isAuthenticated(req)
+          authEndpoint: "/plugins/sources/#{source.NAME}/" + _.trimLeft(source.AUTH_ENDPOINT, '/')
+          iconURL: "/plugins/sources/#{source.NAME}/icon"
         if not data.isAuthenticated
           callback(null, data)
         else
-          sourceProvider.getRepositoryListForUser req.user, (sourceProviderError, list) ->
-            return callback(sourceProviderError) if sourceProviderError?
-            async.map list, getActiveStatusForRepo(sourceProvider.NAME, req.user._id), (getRepoActiveStatusError, activeData) ->
+          source.getRepositoryListForUser req.user, (sourceError, list) ->
+            return callback(sourceError) if sourceError?
+            async.map list, getActiveStatusForRepo(source.NAME, req.user._id), (getRepoActiveStatusError, activeData) ->
               return callback(getRepoActiveStatusError) if getRepoActiveStatusError?
               data.repoList = activeData
               callback(null, data)
       ), (mapError, mapData) ->
         res.status(500).send {error: mapError.toString()} if mapError?
-        _.each mapData, (sourceProvider) ->
-          sourceProvider.repoList = _.sortByOrder sourceProvider.repoList, ['NAME'], ['asc']
-          _.each sourceProvider.repoList, (repoObject) ->
+        _.each mapData, (source) ->
+          source.repoList = _.sortByOrder source.repoList, ['NAME'], ['asc']
+          _.each source.repoList, (repoObject) ->
             inactiveServices = _.difference (_.pluck initPlugins.services, 'NAME'), repoObject.activeServices
             serviceNameToObject = (active) -> (serviceName) ->
               rawService = _.findWhere initPlugins.services, {NAME: serviceName}
-              {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_PROVIDERS} = rawService
-              return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_PROVIDERS, active, isAuthenticated: rawService.isAuthenticated(), sourceProviderName: sourceProvider.name, repoId: repoObject.id}
+              {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_SOURCES} = rawService
+              return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, WORKS_WITH_SOURCES, active, isAuthenticated: rawService.isAuthenticated(), sourceName: source.name, repoId: repoObject.id}
             activeServicesAsObjects = _.map repoObject.activeServices, serviceNameToObject(true)
             inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
             repoObject.services = _(activeServicesAsObjects.concat(inactiveServicesAsObjects))
-              .filter(({sourceProviderName, WORKS_WITH_PROVIDERS}) ->
-                return not WORKS_WITH_PROVIDERS? or _.contains WORKS_WITH_PROVIDERS, sourceProviderName
+              .filter(({sourceName, WORKS_WITH_SOURCES}) ->
+                return not WORKS_WITH_SOURCES? or _.contains WORKS_WITH_SOURCES, sourceName
               )
               .sortByOrder(['DISPLAY_NAME'], ['asc'])
               .value()

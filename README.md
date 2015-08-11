@@ -11,7 +11,7 @@ The initial inspiration from Sentry came from lessons learned while building [To
 1. It was difficult to extend TodoBot to track other source-code-level issues, such as ignored tests.
 2. TodoBot was tied to GitHub, and could not easily be modified to support other Git hosts, such as BitBucket, GitLab, or Stash.
 
-Sentry solves these problems by providing a plugin API. **Source plugins** are used to represent remote Git sources: GitHub is supported (in public and private flavors), and BitBucket/GitLab support are coming soon. **Service plugins** represent ways to process code received from a source provider, and can be reused across many different Git sources. The Sentry app acts as an intermediate layer between source providers and services, listening to the source providers and running the active services for each repo when the data changes.
+Sentry solves these problems by providing a plugin API. **Source plugins** are used to represent remote Git sources: GitHub is supported (in public and private flavors), and BitBucket/GitLab support are coming soon. **Service plugins** represent ways to process code received from a source, and can be reused across many different Git sources. The Sentry app acts as an intermediate layer between sources and services, listening to the sources and running the active services for each repo when the data changes.
 
 ![Sentry architecture diagram](https://docs.google.com/drawings/d/1T4fILw5CzybzsWGTqvf85UDYSr69ShZOT4TGyaQYMnQ/pub?w=720&h=540)
 
@@ -71,7 +71,7 @@ You can also configure each active repository from with the app. Here, you can l
 
 ### Writing Plugins
 
-To help get you started with writing your own plugins for Sentry, we've provided two guides: [one for sources](docs/SourceProviderGuide.md), and [one for services](ServiceGuide.md). We want writing plugins to be *really easy*, so if something is unclear, it's our fault - not yours! Post an issue on this repository and we'll be happy to help you out.
+To help get you started with writing your own plugins for Sentry, we've provided two guides: [one for sources](docs/SourceGuide.md), and [one for services](ServiceGuide.md). We want writing plugins to be *really easy*, so if something is unclear, it's our fault - not yours! Post an issue on this repository and we'll be happy to help you out.
 
 ### List of Plugins
 

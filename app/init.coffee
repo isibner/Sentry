@@ -11,15 +11,15 @@ module.exports = (dependencies) ->
   ActiveRepo = db.model('ActiveRepo')
   return (app) ->
 
-    # Initialize all plugins and sourceProviders
+    # Initialize all plugins and sources
     initPlugins = {}
-    {sourceProviders, services} = plugins
+    {sources, services} = plugins
     serverConfig = config.server
-    initPlugins.sourceProviders = _.map sourceProviders, (Provider) ->
-      instance = new Provider {serverConfig, packages, config: config[Provider.NAME]}
-      return _.extend instance, Provider
+    initPlugins.sources = _.map sources, (Source) ->
+      instance = new Source {serverConfig, packages, config: config[Source.NAME]}
+      return _.extend instance, Source
     initPlugins.services = _.map services, (Service) ->
-      instance = new Service {db, packages, serverConfig, config: config[Service.NAME], sourceProviders: initPlugins.sourceProviders}
+      instance = new Service {db, packages, serverConfig, config: config[Service.NAME], sources: initPlugins.sources}
       return _.extend instance, Service
 
     # See https://github.com/expressjs/body-parser/issues/100
@@ -88,10 +88,10 @@ module.exports = (dependencies) ->
       res.locals.user = req.user
       next()
 
-    _.forEach initPlugins.sourceProviders, (sourceProvider) ->
-      sourceProvider.on 'hook', ({repoId}) ->
+    _.forEach initPlugins.sources, (source) ->
+      source.on 'hook', ({repoId}) ->
         console.log "Running hooks for #{repoId}..."
-        ActiveRepo.find {repoId, sourceProviderName: sourceProvider.NAME}, (mongoError, docs) ->
+        ActiveRepo.find {repoId, sourceName: source.NAME}, (mongoError, docs) ->
           return console.error(mongoError, mongoError.stack) if mongoError
           _.each docs, (activeRepo) ->
             repoIdString = activeRepo._id.toString()
@@ -100,7 +100,7 @@ module.exports = (dependencies) ->
               if queueProcessErr?
                 msg = "Error handling #{repoIdString} for #{activeRepo.repoId}"
                 return console.error msg, queueProcessErr, queueProcessErr.stack
-              console.log "Handled hook repo data (#{sourceProvider.NAME}, #{activeRepo.repoId}) successfully!"
+              console.log "Handled hook repo data (#{source.NAME}, #{activeRepo.repoId}) successfully!"
 
     _.forEach controllers, (controller) ->
       controller({app, initPlugins})

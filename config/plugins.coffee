@@ -1,4 +1,4 @@
-sourceProviders = ['sentry-source-github']
+sources = ['sentry-source-github']
 services = ['sentry-service-cruft']
 
-module.exports = {sourceProviders, services}
+module.exports = {sources, services}
