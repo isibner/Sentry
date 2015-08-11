@@ -8,7 +8,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
   # Constants should be defined on the class itself.
 
   # The name of your source provider, in kebab-case.
-  @NAME = 'your_internal_source_provider_name'
+  @NAME = 'your-internal-source-provider-name'
 
   # The header that the user will see the repos from this source listed under.
   @DISPLAY_NAME = 'Your Source Provider Display Name'
@@ -16,10 +16,12 @@ class ExampleSourceProvider extends require('events').EventEmitter
   # The icon file for this source provider, as an absolute path - or `null` if there's no icon.
   @ICON_FILE_PATH = __dirname + '/path/to/the/icon.png'
 
-  # The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
-  # This endpoint *must* be registered in initializeAuthEndpoints().
-  # This can be null if this service provider expects to be manually configured; in this case,
-  # isAuthenticated() should always return true.
+  ###
+  The initial endpoint to hit in order to authenticate this service provider, relative to '/plugins/source-providers/{@NAME}'.
+  This endpoint *must* be registered in initializeAuthEndpoints().
+  This can be null if this service provider expects to be manually configured; in this case,
+  isAuthenticated() must always return true.
+  ###
   @AUTH_ENDPOINT = '/auth'
 
   ###
@@ -47,6 +49,7 @@ class ExampleSourceProvider extends require('events').EventEmitter
   @return {Boolean} true, if the request is authenticated.
   ###
   isAuthenticated: (req) ->
+
   ###
   Get a list of available repositories for the currently logged in user.
   @param {Object} user the Mongoose model for the user
