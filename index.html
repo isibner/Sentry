@@ -1,1 +1,246 @@
-page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sentry</title>
+  <!-- Favicon stuff -->
+  <link rel="apple-touch-icon" sizes="57x57" href="./favicons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="./favicons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="./favicons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="./favicons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="./favicons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="./favicons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="./favicons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="./favicons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./favicons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="./favicons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicons/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600|Lato:300,400,900' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/normalize.css">
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/bootstrap-social.css">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="./css/theme.css">
+
+  <style type="text/css">
+    .header-img {
+      margin: 0 auto;
+      display: block;
+      max-width: 220px;
+    }
+
+    #headerwrap {
+      padding-top: 0;
+      min-height: initial;
+    }
+
+    #headerwrap h1 {
+      text-shadow: 0px 2px 2px rgba(0,0,0,0.15);
+    }
+
+    #headerwrap h2 {
+      color: white;
+      text-shadow: 0px 2px 2px rgba(0,0,0,0.15);
+    }
+
+    .btn-social i {
+      margin: 0;
+      color: white;
+    }
+
+    .navbar-default {
+      background-color: rgb(197, 16, 36);
+    }
+    .navbar-default .navbar-toggle .icon-bar {
+      background-color: white;
+    }
+    .navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+      background-color: #f66;
+    }
+
+    .navbar-default .navbar-nav li {
+      font-weight: bold;
+    }
+
+    .navbar-default .navbar-nav>li>a:hover, .navbar-default .navbar-nav>li>a:focus,
+    .navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+      color: #dadada;
+    }
+
+    .btn-get-started {
+      color: #fff;
+      background-color: #444;
+      border-color: rgba(0,0,0,0.2);
+      font-size: 1.6em;
+      padding: 10px 1em;
+    }
+
+    .btn-get-started:hover {
+      background-color: #333;
+      color: #eee;
+    }
+
+    #headerwrap .header-btn {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    .btn-repo {
+      min-width: 100px;
+    }
+
+    .navbar-fixed-top {
+      z-index: 1;
+    }
+
+    #headerwrap div.container:nth-of-type(1){
+      padding-top: 75px;
+    }
+
+    .configure-repo-form textarea {
+      width: 100%;
+      resize: false;
+      min-height: 300px;
+      font-family: monospace;
+    }
+
+    #alerts.alerts-index {
+      position: absolute;
+      left:0;
+      right:0;
+      margin-left:auto;
+      margin-right:auto;
+      top: 60px;
+      z-index: 1;
+    }
+
+    .repoName {
+      margin-bottom: 20px;
+    }
+
+    .repoName .name {
+      font-family: Lato;
+      font-size: 1.3em;
+      font-weight: 500;
+    }
+
+    .repoName .label {
+      vertical-align: text-top;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .repoName .configure {
+      vertical-align: super;
+      font-weight: 400;
+    }
+
+    .repoName .configure:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+
+</head>
+<body>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="./"><b>// Sentry</b></a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+<!--           <li>
+            <a href="./">Foo</a>
+          </li>
+          <li>
+            <a href="./">Bar</a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div id="headerwrap">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-8">
+            <h1>Meet <b>Sentry.</b></h1>
+            <h2>Wherever your code is hosted, <b>Sentry</b> is ever vigilant.</h2><h2>He'll tirelessly watch your source to help you track down bad practices.</h2>
+            <div class="text-center">
+              <a href="http://github.com/isibner/sentry" class="btn btn-lg btn-get-started">
+                Get Sentry
+              </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="header-img">
+              <img class="img-responsive" src="./img/british_sentry_markmurphycreative.png" alt="Sentry at his post">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row mt centered">
+        <div class="col-lg-6">
+          <h1><b>Fully Extensible</b><br/>With Customisable Services</h1>
+          <div style="text-align: left;">
+            <h3>Sentry watches your code for changes and passes them along to <b>services</b>, which can be configured for fine-grained control over how they're applied. You can also add <a href="/coming-soon">custom services</a> for any use case.</h3>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <h1><b>Use Any Git Source</b><br/>Track Anything, Anywhere</h1>
+          <div style="text-align: left;">
+            <h3>
+              Sentry can pull code from many different sources using <b>sources</b>. Github works right out of the box! If there's not a source for your host of choice, <a href="/coming-soon">it's easy to write your own</a>.
+            </h3>
+          </div>
+        </div>
+      </div><!-- /row -->
+    </div>
+
+  <footer class="container">
+    <hr>
+      <p class="centered">Created by <a href="http://fabiofleitas.com/">Fabio Fleitas</a> &amp; <a href="http://www.isibner.me/">Ian Sibner</a> @ <a href="http://2015s.pennapps.com/">PennApps 2015</a>
+      <br>
+      {{#if isIndex}}
+        Image by <a href="http://www.markmurphycreative.co.uk/">Mark Murphy Creative</a>
+      {{/if}}
+    </p>
+  </footer>
+
+  <script src="./js/jquery.min.js"></script>
+  <script src="./js/bootstrap.min.js"></script>
+
+  {{renderSection 'scripts'}}
+
+</body>
+</html>
