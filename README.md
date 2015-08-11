@@ -71,7 +71,7 @@ You can also configure each active repository from with the app. Here, you can l
 
 ### Writing Plugins
 
-To help get you started with writing your own plugins for Sentry, there are two heavily-annotated templates in this repository: [one for source providers](SourceProviderTemplate.coffee), and [one for services](ServiceTemplate.coffee). We want writing plugins to be *really easy*, so if something is unclear, it's our fault - not yours! Post an issue on this repository and we'll be happy to help you out.
+To help get you started with writing your own plugins for Sentry, we've provided two guides: [one for source providers](docs/SourceProviderGuide.md), and [one for services](ServiceGuide.md). We want writing plugins to be *really easy*, so if something is unclear, it's our fault - not yours! Post an issue on this repository and we'll be happy to help you out.
 
 ### List of Plugins
 
