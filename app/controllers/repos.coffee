@@ -35,6 +35,18 @@ module.exports = (dependencies) ->
     activateRepo = ({userObject, sourceName, repoId}) -> (activeRepoWithId, callback) ->
       getSourceSync(sourceName).activateRepo userObject, repoId, (err) -> callback(err, activeRepoWithId)
 
+    deactivateAllActiveServices = ({userId, sourceName, repoId}) -> (callback) ->
+      # TODO - this is repeated in Services.coffee, should be factored out to lib/
+      ActiveRepo.findOne {repoId, sourceName, userId}, (err, activeRepo) ->
+        return callback(err) if err?
+        if not activeRepo?
+          return callback(new Error 'Repo not found. It may be inactive or nonexistent.')
+        async.each activeRepo.activeServices, ((serviceName, eachCallback) ->
+          service = _.findWhere initPlugins.services, {NAME: serviceName}
+          deactivationOptions = {repoModel: activeRepo, repoConfig: activeRepo.configObject?[serviceName]}
+          service.deactivateServiceForRepo deactivationOptions, (deactivateErr) -> eachCallback(deactivateErr)
+        ), callback
+
     deactivateRepo = ({userObject, sourceName, repoId}) -> (callback) ->
       getSourceSync(sourceName).deactivateRepo userObject, repoId, (err) -> callback(err)
 
@@ -103,6 +115,7 @@ module.exports = (dependencies) ->
         checkSourceExists(contextObject),
         checkUserOwnsRepo(contextObject),
         checkRepoActive(contextObject),
+        deactivateAllActiveServices(contextObject),
         deactivateRepo(contextObject),
         removeRepoFromDatabase(contextObject),
         deleteRepoFiles
