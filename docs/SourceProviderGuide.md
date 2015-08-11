@@ -15,7 +15,7 @@ sentry-source-awesome
 └── package.json
 ```
 
-### package.json
+### `package.json`
 
 This is just a regular old package.json file, for the most part; see [the npm docs](https://docs.npmjs.com/files/package.json)
 if you're unfamiliar. There are only a few best practices to note here:
@@ -27,6 +27,12 @@ if you want to use [handlebars](https://github.com/wycats/handlebars.js) or [pas
 these should go in `peerDependencies` so you get the same instance as Sentry.
 * If you're publishing to NPM, the keywords for your package should include `"sentry"`, `"source"`, and your source's name.
 
-### icon.png
+### `icon.png`
 
 A square icon that Sentry will use to display your source in the UI. 128x128 is a good size.
+
+### `index.js`
+
+This is what your NPM module exposes - a class representing your Sentry source.
+
+It is **highly recommended**, though not required, that you implement this class in CoffeeScript, then compile it into a `.js` file. An annotated template, which specifies all required methods and their parameters, can be found in [`ExampleSourceProvider.coffee`](./ExampleSourceProvider.coffee). The best way to write a simple source is to copy this template into your own project and fill in the method stubs. You can also check [the list of existing source providers](https://github.com/isibner/Sentry/#source-providers) for working examples.
