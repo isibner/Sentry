@@ -4,7 +4,12 @@ template: markdown.html
 ---
 # Adding Plugins
 
-Sentry plugins are packaged as NPM modules. To install one, use `npm install $PLUGIN_PACKAGE_NAME`, and add the package name to [`config/plugins.coffee`](config/plugins.coffee).
+Sentry plugins are packaged as NPM modules, so you can install them like you would any other module.
+```
+npm install --save $PLUGIN_PACKAGE_NAME
+```
+
+Don't forget to add the package name to [`config/plugins.coffee`](config/plugins.coffee) so that Sentry knows to use it!
 
 You will also want to add a configuration file, which should go under `config/PLUGIN_NAME.coffee`. The plugin package's README should have a full list of its supported configuration variables.
 
