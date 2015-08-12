@@ -90,7 +90,12 @@
 <div class="container markdown-container">
   <div class="row mt">
     <div class="col-md-10 col-md-offset-1">
-      <h1 id="list-of-plugins">List of plugins</h1>
+      <h1 id="adding-plugins">Adding Plugins</h1>
+<p>Sentry plugins are packaged as NPM modules, so you can install them like you would any other module.</p>
+<pre><code>npm install --save $PLUGIN_PACKAGE_NAME
+</code></pre><p>Don’t forget to add the package name to <a href="/sentry/plugins/config/plugins.coffee"><code>config/plugins.coffee</code></a> so that Sentry knows to use it!</p>
+<p>You will also want to add a configuration file, which should go under <code>config/PLUGIN_NAME.coffee</code>. The plugin package’s README should have a full list of its supported configuration variables.</p>
+<h1 id="list-of-plugins">List of plugins</h1>
 <h3 id="sources">Sources</h3>
 <ul>
 <li><a href="https://github.com/isibner/sentry-source-github">sentry-source-github</a> - plugin for GitHub public repos</li>
