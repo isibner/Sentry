@@ -93,8 +93,8 @@
       <h1 id="adding-plugins">Adding Plugins</h1>
 <p>Sentry plugins are packaged as NPM modules, so you can install them like you would any other module.</p>
 <pre><code>npm install --save $PLUGIN_PACKAGE_NAME
-</code></pre><p>Don’t forget to add the package name to <a href="/sentry/plugins/config/plugins.coffee"><code>config/plugins.coffee</code></a> so that Sentry knows to use it!</p>
-<p>You will also want to add a configuration file, which should go under <code>config/PLUGIN_NAME.coffee</code>. The plugin package’s README should have a full list of its supported configuration variables.</p>
+</code></pre><p>Don’t forget to add the package name to <code>config/plugins.coffee</code> so that Sentry knows to use it!</p>
+<p>You will also want to add a configuration file, which should go under <code>config/PLUGIN_NAME.coffee</code>. The plugin package’s README should have a full list of its supported configuration variables. See the <a href="/sentry/configuring/#configuring-individual-plugins">docs on plugin configuration</a> for details.</p>
 <h1 id="list-of-plugins">List of plugins</h1>
 <h3 id="sources">Sources</h3>
 <ul>
