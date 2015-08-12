@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="A flexible, simple continuous integration server for code quality.">
+  <title>Source API</title>
+  <!-- Favicon stuff -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/sentry/favicons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/sentry/favicons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/sentry/favicons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/sentry/favicons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/sentry/favicons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/sentry/favicons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/sentry/favicons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/sentry/favicons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/sentry/favicons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/sentry/favicons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/sentry/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/sentry/favicons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/sentry/favicons/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600|Lato:300,400,900' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/sentry/css/vendor/normalize.css">
+  <link rel="stylesheet" href="/sentry/css/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/sentry/css/vendor/bootstrap-social.css">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/sentry/css/vendor/theme.css">
+
+  <!-- HighlightJS CSS -->
+  <link rel="stylesheet" type="text/css" href="/sentry/css/hljs-theme-github.css">
+
+  <!-- base CSS -->
+  <link rel="stylesheet" href="/sentry/css/base.css">
+
+</head>
+<body>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/sentry/"><b>// Sentry</b></a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/sentry/about">About</a>
+          </li>
+          <li>
+            <a href="/sentry/quickstart">Quickstart</a>
+          </li>
+          <li>
+            <a href="/sentry/configuring">Configuring</a>
+          </li>
+          <li>
+            <a href="/sentry/plugins">Plugins</a>
+          </li>
+          <li class="dropdown">
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/sentry/sources">Sources</a></li>
+                <li><a href="/sentry/services">Services</a></li>
+              </ul>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+  
+<link rel="stylesheet" type="text/css" href="/sentry/css/markdown.css">
+
+<div class="container markdown-container">
+  <div class="row mt">
+    <div class="col-md-10 col-md-offset-1">
+      <h1 id="writing-sentry-sources">Writing Sentry Sources</h1>
+<p>By writing a Sentry source, you can integrate your favorite Git source with Sentry. This allows you to track your code even
+when it’s on a privately-hosted Git services like Stash. If your service of choice supports OAuth, your source
+can use that to authenticate.</p>
+<p>At its core, a Sentry source is just an NPM module that exposes a source class. So all the normal rules of Node apply -
+you can have other modules as dependencies, make helper files, and so on. At a minimum though, a bare-bones sentry source needs
+three things: a <code>package.json</code> file, a source class (which will be the module’s export), and an icon file.</p>
+<pre><code>sentry-source-awesome
+├── icon.png
+├── index.js
+└── package.json
+</code></pre><h2 id="-package-json-"><code>package.json</code></h2>
+<p>This is just a regular old package.json file, for the most part; see <a href="https://docs.npmjs.com/files/package.json">the npm docs</a>
+if you’re unfamiliar. There are only a few best practices to note here:</p>
+<ul>
+<li>Your package name should follow the format <code>sentry-source-YOUR-SOURCE-NAME</code>. This makes it easy for others to see your source
+name at a glance. Note that your source name should be in kebab-case.</li>
+<li>Sentry already provides many of the dependencies you’re likely to use, so you can put them in <code>peerDependencies</code>. In particular,
+if you want to use <a href="https://github.com/wycats/handlebars.js">handlebars</a> or <a href="https://github.com/jaredhanson/passport">passport</a>,
+these should go in <code>peerDependencies</code> so you get the same instance as Sentry.</li>
+<li>If you’re publishing to NPM, the keywords for your package should include <code>&quot;sentry&quot;</code>, <code>&quot;source&quot;</code>, and your source’s name.</li>
+</ul>
+<h2 id="-icon-png-"><code>icon.png</code></h2>
+<p>A square icon that Sentry will use to display your source in the UI. 128x128 is a good size.</p>
+<h2 id="-index-js-"><code>index.js</code></h2>
+<p>This is what your NPM module exposes - a class representing your Sentry source.It is <strong>highly recommended</strong>, though not required, that you implement this class in CoffeeScript, then compile it into a <code>.js</code> file.</p>
+<p>The best way to write a simple source is to copy <a href="https://github.com/isibner/sentry/blob/master/docs/SourceTemplate.coffee">this template source</a> into your own project and fill in the method stubs. You can also check <a href="https://github.com/isibner/sentry/#sources">the list of existing sources</a> for working examples.</p>
+<h1 id="one-off-sources">One-off sources</h1>
+<p>Sometimes, you want to write a Sentry source that just encapsulates a few repositories, or even a single repository. Maybe you’re working on a team at a large company <!-- cough PALANTIR cough -->and your code is all in one Atlassian Stash repo. For cases like this, it’s usually easiest to write a one-off source like the one below (which works for Stash and monitors the <code>develop</code> branch).</p>
+<pre><code class="lang-coffeescript">_ = <span class="hljs-built_in">require</span> <span class="hljs-string">'lodash'</span>
+path = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OneOffSource</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">require</span>('<span class="hljs-title">events</span>').<span class="hljs-title">EventEmitter</span></span>
+  <span class="hljs-property">@NAME</span>: <span class="hljs-string">'one-off-source'</span>
+  <span class="hljs-property">@DISPLAY_NAME</span>: <span class="hljs-string">'One Off Source'</span>
+  <span class="hljs-property">@ICON_FILE_PATH</span>: path.join(__dirname, <span class="hljs-string">'../'</span>, <span class="hljs-string">'stash.png'</span>)
+  <span class="hljs-property">@AUTH_ENDPOINT</span>: <span class="hljs-literal">null</span>
+
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">({<span class="hljs-property">@config</span>, <span class="hljs-property">@packages</span>})</span> -&gt;</span>
+
+  <span class="hljs-attribute">initializeAuthEndpoints</span>: <span class="hljs-function"><span class="hljs-params">(router)</span> -&gt;</span>
+
+  <span class="hljs-attribute">isAuthenticated</span>: <span class="hljs-function"><span class="hljs-params">(req)</span> -&gt;</span> <span class="hljs-literal">true</span>
+
+  <span class="hljs-attribute">getRepositoryListForUser</span>: <span class="hljs-function"><span class="hljs-params">(user, callback)</span> -&gt;</span>
+    callback <span class="hljs-literal">null</span>, [{<span class="hljs-attribute">id</span>: <span class="hljs-string">'my-one-off-source'</span>, <span class="hljs-attribute">name</span>: <span class="hljs-string">'The One Repo'</span>}]
+
+  <span class="hljs-attribute">activateRepo</span>: <span class="hljs-function"><span class="hljs-params">(userModel, repoId, callback)</span> -&gt;</span> callback()
+
+  <span class="hljs-attribute">cloneUrl</span>: <span class="hljs-function"><span class="hljs-params">(userModel, repoModel)</span> -&gt;</span> <span class="hljs-keyword">return</span> <span class="hljs-string">'ssh://git@host.com/myrepo/hindenburg.git'</span>
+
+  <span class="hljs-attribute">initializeHooks</span>: <span class="hljs-function"><span class="hljs-params">(router)</span> -&gt;</span>
+    router.post <span class="hljs-string">'/webhook'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> =&gt;</span>
+      <span class="hljs-keyword">if</span> req.body?.refChanges?[<span class="hljs-number">0</span>].refId <span class="hljs-keyword">is</span> <span class="hljs-string">'refs/heads/develop'</span> <span class="hljs-keyword">and</span> req.body?.refChanges?[<span class="hljs-number">0</span>].type <span class="hljs-keyword">is</span> <span class="hljs-string">'UPDATE'</span>
+        <span class="hljs-property">@emit</span> <span class="hljs-string">'hook'</span>, {<span class="hljs-attribute">repoId</span>: <span class="hljs-string">'airship'</span>}
+      res.send {<span class="hljs-attribute">success</span>: <span class="hljs-literal">true</span>}
+
+  <span class="hljs-attribute">deactivateRepo</span>: <span class="hljs-function"><span class="hljs-params">(userModel, repoId, callback)</span> -&gt;</span> callback()
+
+<span class="hljs-built_in">module</span>.exports = AirshipStashSource
+</code></pre>
+<p>One important thing to note is that a one-off source, especially in enterprise, will not set up any webhooks, and some (like the example above) may rely on you having set up an SSH key. You will have to set up the webhook and authorize a key yourself. Once you’ve done so, you can configure your source to clone using your key by adding an <code>SSH_KEYPATH</code> variable to <code>config/SOURCE_NAME.coffee</code>:</p>
+<pre><code class="lang-coffeescript"><span class="hljs-built_in">module</span>.exports =
+  <span class="hljs-attribute">SSH_KEYPATH</span>: <span class="hljs-string">'~/.ssh/sentry_rsa'</span>
+</code></pre>
+
+    </div>
+  </div><!-- /row -->
+</div>
+
+  </div>
+  
+  <script src="/sentry/js/jquery.min.js"></script>
+  <script src="/sentry/js/bootstrap.min.js"></script>
+  
+
+</body>
+</html>

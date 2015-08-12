@@ -1,0 +1,6 @@
+{
+  "template": "index.html",
+  "showFooter": true,
+  "staticNavbar": true,
+  "title": "Sentry"
+}

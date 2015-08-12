@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="A flexible, simple continuous integration server for code quality.">
+  <title>About</title>
+  <!-- Favicon stuff -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/sentry/favicons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/sentry/favicons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/sentry/favicons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/sentry/favicons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/sentry/favicons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/sentry/favicons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/sentry/favicons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/sentry/favicons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/sentry/favicons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/sentry/favicons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/sentry/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/sentry/favicons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/sentry/favicons/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600|Lato:300,400,900' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/sentry/css/vendor/normalize.css">
+  <link rel="stylesheet" href="/sentry/css/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/sentry/css/vendor/bootstrap-social.css">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/sentry/css/vendor/theme.css">
+
+  <!-- HighlightJS CSS -->
+  <link rel="stylesheet" type="text/css" href="/sentry/css/hljs-theme-github.css">
+
+  <!-- base CSS -->
+  <link rel="stylesheet" href="/sentry/css/base.css">
+
+</head>
+<body>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/sentry/"><b>// Sentry</b></a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/sentry/about">About</a>
+          </li>
+          <li>
+            <a href="/sentry/quickstart">Quickstart</a>
+          </li>
+          <li>
+            <a href="/sentry/configuring">Configuring</a>
+          </li>
+          <li>
+            <a href="/sentry/plugins">Plugins</a>
+          </li>
+          <li class="dropdown">
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/sentry/sources">Sources</a></li>
+                <li><a href="/sentry/services">Services</a></li>
+              </ul>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+  
+<link rel="stylesheet" type="text/css" href="/sentry/css/markdown.css">
+
+<div class="container markdown-container">
+  <div class="row mt">
+    <div class="col-md-10 col-md-offset-1">
+      <h1 id="about-sentry">About Sentry</h1>
+<p>The initial inspiration from Sentry came from lessons learned while building <a href="https://github.com/FabioFleitas/todobot">TodoBot</a>. The idea of tracking source-code quality was a good one, but there were two problems with the approach we took:</p>
+<ol>
+<li>It was difficult to extend TodoBot to track other source-code-level issues, such as ignored tests.</li>
+<li>TodoBot was tied to GitHub, and could not easily be modified to support other Git hosts, such as BitBucket, GitLab, or Stash.</li>
+</ol>
+<p>Sentry solves these problems by providing a plugin API. <strong>Source plugins</strong> are used to represent remote Git sources: GitHub is supported (in public and private flavors), and BitBucket/GitLab support are coming soon. <strong>Service plugins</strong> represent ways to process code received from a source, and can be reused across many different Git sources. The Sentry app acts as an intermediate layer between sources and services, listening to the sources and running the active services for each repo when the data changes.</p>
+<div class="centered">
+    <img src="https://docs.google.com/drawings/d/1T4fILw5CzybzsWGTqvf85UDYSr69ShZOT4TGyaQYMnQ/pub?w=720&amp;h=540" alt="Sentry architecture diagram">
+</div>
+    </div>
+  </div><!-- /row -->
+</div>
+
+  </div>
+  
+  <script src="/sentry/js/jquery.min.js"></script>
+  <script src="/sentry/js/bootstrap.min.js"></script>
+  
+
+</body>
+</html>

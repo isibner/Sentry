@@ -1,0 +1,20 @@
+{
+  "locals": {
+    "baseUrl": "/sentry"
+  },
+  "plugins": [
+    "wintersmith-coffee",
+    "wintersmith-livereload",
+    "wintersmith-handlebars"
+  ],
+  "baseUrl": "/sentry",
+  "require": {
+    "moment": "moment",
+    "_": "underscore",
+    "typogr": "typogr"
+  },
+  "markdown": {
+    "smartLists": true,
+    "smartypants": true
+  }
+}

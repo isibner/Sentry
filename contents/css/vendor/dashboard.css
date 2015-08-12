@@ -1,0 +1,10 @@
+.alert .fa-cog {
+  font-size: 1.5em;
+  line-height: 1.5em;
+}
+
+.service-icon {
+  max-height: 1.75em;
+  display: inline-block;
+  margin-right: 0.5em;
+}

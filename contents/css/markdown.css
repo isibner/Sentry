@@ -1,0 +1,7 @@
+.markdown-container, .markdown-container p {
+  margin-top: 20px;
+  color: #555;
+  font-size: 18px;
+}
+
+.markdown-container li { margin-bottom: 1rem; }
