@@ -1,3 +1,5 @@
+$.ajaxSetup({ cache: false });
+
 var SourceModel = Backbone.Model.extend({
   idAttribute: 'name'
 });
