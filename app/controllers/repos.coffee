@@ -94,7 +94,7 @@ module.exports = (dependencies) ->
         serviceNameToObject = (active) -> (serviceName) ->
           rawService = _.findWhere initPlugins.services, {NAME: serviceName}
           {NAME, DISPLAY_NAME, AUTH_ENDPOINT} = rawService
-          return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceName, repoId, isAuthenticated: rawService.isAuthenticated()}
+          return {NAME, DISPLAY_NAME, AUTH_ENDPOINT, active, sourceName, repoId, isAuthenticated: rawService.isAuthenticated(req)}
         activeServicesAsObjects = _.map activeRepoWithId.activeServices, serviceNameToObject(true)
         inactiveServicesAsObjects = _.map inactiveServices, serviceNameToObject(false)
         # services = _.sortByOrder activeServicesAsObjects.concat(inactiveServicesAsObjects), ['DISPLAY_NAME'], ['asc']
